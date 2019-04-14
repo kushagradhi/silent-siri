@@ -1,0 +1,81 @@
+Borders            Cities             Countries          Mountains        
+Capitals           Continents         CountryContinents  Seas             
+CREATE TABLE IF NOT EXISTS "Borders" ("Country1" INTEGER NOT NULL ,"Country2" INTEGER NOT NULL , PRIMARY KEY ("Country1","Country2") );
+Country1    Country2  
+----------  ----------
+1           6         
+2           1         
+2           4         
+2           5         
+2           6         
+2           7         
+2           8         
+3           9         
+4           6         
+Id          Name      
+----------  ----------
+1           Paris     
+2           Rome      
+3           Ottawa    
+4           Vienna    
+5           Ljubljana 
+6           Bern      
+7           San Marino
+8           Vatican Ci
+9           Washington
+Id          Name      
+----------  ----------
+1           France    
+2           Italy     
+3           Canada    
+4           Austria   
+5           Slovenia  
+6           Switzerlan
+7           San Marino
+8           Vatican Ci
+9           USA       
+Id          Name           Height    
+----------  -------------  ----------
+1           Mount Everest  8848      
+2           K2             8611      
+3           Kangchenjunga  8586      
+4           Lhotse         8516      
+5           Makalu         8485      
+6           Cho Oyu        8201      
+CountryId   CityId    
+----------  ----------
+1           1         
+2           2         
+3           3         
+4           4         
+5           5         
+6           6         
+7           7         
+8           8         
+9           9         
+Id          Continent   Area_KM2    Population  Highest     Lowest    
+----------  ----------  ----------  ----------  ----------  ----------
+1           Asia        43820000    3879000000  8848        -422      
+2           Africa      30370000    922011000   5895        -508      
+3           North Amer  24490000    528720588   6198        -1512     
+4           South Amer  17840000    382000000   6960        -105      
+5           Antarctica  13720000    1000        4892        -2540     
+6           Europe      10180000    731000000   5633        -28       
+7           Australia   9008500     31260000    4884        -15       
+CountryId   ContinentId
+----------  -----------
+1           6          
+2           6          
+3           3          
+4           6          
+5           6          
+6           6          
+7           6          
+8           6          
+9           3          
+Id          Ocean         Deepest   
+----------  ------------  ----------
+1           Arctic Ocean  5450      
+2           Atlantic Oce  8605      
+3           Indian Ocean  7258      
+4           Pacific Ocea  10911     
