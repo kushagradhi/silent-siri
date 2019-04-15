@@ -11,7 +11,7 @@ class DB(Enum):
 
 ner_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='ner')
 pos_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='pos')
-queriesFile = '..//data//queries.txt'
+queriesFile = '..//data//queries'
 
 def nerTagger(sentence):
     return list(ner_tagger.tag((sentence.split())))
