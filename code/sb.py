@@ -45,13 +45,14 @@ def getCategoryPredictions(sentences, tagIndicator):
     # category = ['geographical', 'cinema', 'music']
     category = [['place', 'geographic', 'mountain', 'ocean'], ['cinema', 'direct', 'oscar', 'movie'], ['pop', 'music', 'musician', 'sing', 'album']]
     tags=[]
-    for index, sentence in enumerate(sentences):
+    for index, sentence in enumerate(sentences):        #for all sentences
         scores=[]
-        for cat_i in category:
-            for i in cat_i:
+        for cat_i in category:      #for all categories
+            # nullSynSetCount=0
+            for i in cat_i:     #for all subcategories
                 score = 0
                 cat_synset = wn.synsets(i)[0]
-                for word in sentence.split():
+                for word in sentence.split():       #for all words in sentence
                     word_synsets = wn.synsets(word)
                     if(len(word_synsets)==0):
                         continue
@@ -64,8 +65,10 @@ def getCategoryPredictions(sentences, tagIndicator):
                     #     score += word_synset.lch_similarity(cat_synset)
                     # print(f'{word}: {score}')
             # scores.append(max(score))
-            scores.append(score/len(i))
+            scores.append(score/(len(cat_i)))
         tagPrediction = scores.index(max(scores))
+        # if(index==23):
+        print(f'{sentence}, {scores}\n \n')
         if(tagIndicator[index]==-2):
             if(scores[1]>scores[2]):
                 tagPrediction=1
@@ -89,9 +92,9 @@ def main():
     # print(queries)
     tags = hasOnlyLocationTags(queries)
 
-    # stop_words = set(stopwords.words('english')) 
-    # for i, query in enumerate(queries):
-    #     queries[i] = " ".join([word for word in word_tokenize(query) if not word in stop_words])
+    stop_words = set(stopwords.words('english')) 
+    for i, query in enumerate(queries):
+        queries[i] = " ".join([word for word in word_tokenize(query) if not word in stop_words])
     # print(queries)
 
     nonGeoIndices = [i for i,el in enumerate(tags) if el!=0]

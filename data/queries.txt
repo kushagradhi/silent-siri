@@ -8,7 +8,7 @@ Did a French actor win the oscar in 2012?,1
 Did a movie by Spielberg with Neeson win the oscar for best film?,1
 Did Madonna sing PapaDoNotPreach?,2
 Does the album Thriller include the track BeatIt?,2
-Was Beyonce’ born in the USA?,2
+Was Beyonce born in the USA?,2
 Who directed Hugo?,1
 Which is the scary movie by Kubrik with Nicholson?,1
 Who won the oscar for the best actor in 2005?,1
