@@ -1,0 +1,134 @@
+Is the Pacific deeper than the Atlantic?
+
+(ROOT
+  (SQ
+    (VBZ Is)
+    (NP (DT the) (NNP Pacific))
+    (NP
+      (NP (JJR deeper))
+      (PP (IN than) (NP (DT the) (NNP Atlantic))))
+    (. ?)))
+
+=================================================================================
+
+Did Swank win the oscar in 2000?
+
+(ROOT
+  (SQ
+    (VBD Did)
+    (NP (NNP Swank))
+    (VP
+      (VB win)
+      (NP (NP (DT the) (NN oscar)) (PP (IN in) (NP (CD 2000)))))
+    (. ?)))
+
+=================================================================================
+
+Is the Shining by Kubrik?
+
+(ROOT
+  (SQ
+    (VBZ Is)
+    (NP (DT the))
+    (NP (NP (VBG Shining)) (PP (IN by) (NP (NNP Kubrik))))
+    (. ?)))
+
+=================================================================================
+
+Does the album Thriller include the track BeatIt?
+
+(ROOT
+  (S
+    (VP
+      (VBZ Does)
+      (SBAR
+        (S
+          (NP (DT the) (NN album) (NN Thriller))
+          (VP (VBP include) (NP (DT the) (NN track) (NN BeatIt))))))
+    (. ?)))
+
+=================================================================================
+
+Who directed Hugo?
+
+(ROOT
+  (SBARQ
+    (WHNP (WP Who))
+    (SQ (VP (VBD directed) (NP (NNP Hugo))))
+    (. ?)))
+
+=================================================================================
+
+Which is the scary movie by Kubrik with Nicholson?
+
+(ROOT
+  (SBARQ
+    (WHNP (WDT Which))
+    (SQ
+      (VBZ is)
+      (NP
+        (NP (DT the) (JJ scary) (NN movie))
+        (PP
+          (IN by)
+          (NP (NP (NN Kubrik)) (PP (IN with) (NP (NN Nicholson)))))))
+    (. ?)))
+
+=================================================================================
+
+In which continent does Canada lie?
+
+(ROOT
+  (SBARQ
+    (WHPP (IN In) (WHNP (WDT which) (NN continent)))
+    (SQ (VBZ does) (NP (NNP Canada)) (VP (VB lie)))
+    (. ?)))
+
+=================================================================================
+
+With which countries does France have a border?
+
+(ROOT
+  (S
+    (PP
+      (IN With)
+      (SBAR
+        (WHNP (WDT which))
+        (S (NP (NNS countries)) (VP (VBZ does)))))
+    (NP (NNP France))
+    (VP (VB have) (NP (DT a) (NN border)))
+    (. ?)))
+
+=================================================================================
+
+Where was Gaga born?
+
+(ROOT
+  (SBARQ
+    (WHADVP (WRB Where))
+    (SQ (VBD was) (NP (NNP Gaga)) (VP (VBN born)))
+    (. ?)))
+
+=================================================================================
+
+In which album does Aura appear?
+
+(ROOT
+  (SBARQ
+    (WHPP (IN In) (WHNP (WDT which) (NN album)))
+    (SQ (VBZ does) (NP (NNP Aura)) (VP (VB appear)))
+    (. ?)))
+
+=================================================================================
+
+Which album by Swift was released in 2014?
+
+(ROOT
+  (SBARQ
+    (WHNP
+      (WHNP (WDT Which) (NN album))
+      (PP (IN by) (NP (NNP Swift))))
+    (SQ (VBD was) (VP (VBN released) (PP (IN in) (NP (CD 2014)))))
+    (. ?)))
+
+=================================================================================
+
