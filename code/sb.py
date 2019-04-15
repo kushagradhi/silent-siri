@@ -10,25 +10,25 @@ class DB(Enum):
     MUSIC = 2
 
 ner_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='ner')
-
+pos_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='pos')
 queriesFile = '..//data//queries.txt'
 
 def nerTagger(sentence):
     return list(ner_tagger.tag((sentence.split())))
 
 def hasOnlyLocationTags(sentences):
-    # acceptedTags=['O', 'CITY', 'COUNTRY', 'LOCATION']
+    geoTags=['O', 'CITY', 'COUNTRY', 'LOCATION']
+    nonGeoTags=['PERSON', 'NATIONALITY']
     tags = [0 for i in range(len(sentences))]
     for i, sentence in enumerate(sentences):
         onlyOTags = True
         for tagged in nerTagger(sentence):
-            if(i==5):
-                print(tagged[1])
-            # if(tagged[1] not in acceptedTags):
-            #     tags[i]=-1
+            # if(tagged[1] not in geoTags):
+            #     tags[i]=-3
             #     continue
-            if tagged[1].strip() =='PERSON':
+            if tagged[1] not in geoTags:
                 tags[i]=-2
+                onlyOTags = False
                 break
             if not tagged[1] =='O':
                 onlyOTags = False
@@ -37,14 +37,13 @@ def hasOnlyLocationTags(sentences):
         
         # if(i==5):
         #     exit()
-    print(tags)
     # exit()
     return tags
 
 def getCategoryPredictions(sentences, tagIndicator):
     # category = ['movie', 'music']
     # category = ['geographical', 'cinema', 'music']
-    category = [['place', 'geographic', 'mountain', 'ocean'], ['cinema', 'direct', 'oscar', 'movie', 'actor'], ['Gaga', 'music', 'musician', 'sing', 'album', 'artist']]
+    category = [['place', 'geographic', 'mountain', 'ocean'], ['cinema', 'direct', 'oscar', 'movie'], ['pop', 'music', 'musician', 'sing', 'album']]
     tags=[]
     for index, sentence in enumerate(sentences):
         scores=[]
