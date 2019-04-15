@@ -11,42 +11,32 @@ class DB(Enum):
 
 ner_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='ner')
 
-queriesFile = '..//data//queries.txt'
+queriesFile = '..//data//queries - Copy.txt'
 
 def nerTagger(sentence):
     return list(ner_tagger.tag((sentence.split())))
 
 def hasOnlyLocationTags(sentences):
-    # acceptedTags=['O', 'CITY', 'COUNTRY', 'LOCATION']
+    acceptedTags=['O', 'CITY', 'COUNTRY', 'LOCATION']
     tags = [0 for i in range(len(sentences))]
     for i, sentence in enumerate(sentences):
         onlyOTags = True
         for tagged in nerTagger(sentence):
-            if(i==5):
-                print(tagged[1])
-            # if(tagged[1] not in acceptedTags):
-            #     tags[i]=-1
-            #     continue
-            if tagged[1].strip() =='PERSON':
-                tags[i]=-2
-                break
-            if not tagged[1] =='O':
+            if(tagged[1] not in acceptedTags):
+                tags[i]=-1
+                continue
+            if(tagged[1]!='O'):
                 onlyOTags = False
         if(onlyOTags):
-            tags[i]=-3
-        
-        # if(i==5):
-        #     exit()
-    print(tags)
-    # exit()
+            tags[i]=-1
     return tags
 
-def getCategoryPredictions(sentences, tagIndicator):
+def getCategoryPredictions(sentences):
     # category = ['movie', 'music']
     # category = ['geographical', 'cinema', 'music']
-    category = [['place', 'geographic', 'mountain', 'ocean'], ['cinema', 'direct', 'oscar', 'movie', 'actor'], ['Gaga', 'music', 'musician', 'sing', 'album', 'artist']]
+    category = [['place', 'geographic', 'mountain', 'ocean'], ['cinema', 'director', 'oscar', 'movie', 'actor'], ['Gaga', 'music', 'musician', 'sing', 'album']]
     tags=[]
-    for index, sentence in enumerate(sentences):
+    for sentence in sentences:
         scores=[]
         for cat_i in category:
             for i in cat_i:
@@ -66,41 +56,25 @@ def getCategoryPredictions(sentences, tagIndicator):
                     # print(f'{word}: {score}')
             # scores.append(max(score))
             scores.append(score/len(i))
-        tagPrediction = scores.index(max(scores))
-        if(tagIndicator[index]==-2):
-            if(scores[1]>scores[2]):
-                tagPrediction=1
-            else:
-                tagPrediction=2
-        tags.append(tagPrediction)
+        tags.append(scores.index(max(scores)))
     return tags
     # for i in range(len(category)):
     #     print(f'{category[i]}: {scores[i]}', end="\t")
 
 
 def main():
-    queries=[]
-    labels=[]
     with open(queriesFile) as f:
-        lines = f.readlines()
-        for line in lines:
-            query, label = line.split(',') 
-            queries.append(query)
-            labels.append(label)
+        queries = f.readlines()
     # print(queries)
     tags = hasOnlyLocationTags(queries)
-
-    # stop_words = set(stopwords.words('english')) 
-    # for i, query in enumerate(queries):
-    #     queries[i] = " ".join([word for word in word_tokenize(query) if not word in stop_words])
+    stop_words = set(stopwords.words('english')) 
+    for i, query in enumerate(queries):
+        queries[i] = " ".join([word for word in word_tokenize(query) if not word in stop_words])
     # print(queries)
-
-    nonGeoIndices = [i for i,el in enumerate(tags) if el!=0]
-    tagsOthers = getCategoryPredictions([queries[i] for i in nonGeoIndices], [tags[i] for i in nonGeoIndices])
+    nonGeoIndices = [i for i,el in enumerate(tags) if el==-1]
+    tagsOthers = getCategoryPredictions([queries[i] for i in nonGeoIndices])
     for i in range(len(tagsOthers)):
         tags[nonGeoIndices[i]] = tagsOthers[i]
-
-
     
     for i in range(len(tags)):
         if i in nonGeoIndices:
@@ -109,5 +83,5 @@ def main():
     for i in range(len(tags)):
         if i not in nonGeoIndices:
             print(f'{DB(tags[i]).name}: {queries[i]}')
-
+    print(nonGeoIndices)
 main()
