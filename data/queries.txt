@@ -1,26 +1,36 @@
-Is Rome the capital of Italy?,0
-Is France in Europe?,0
-Is the Pacific deeper than the Atlantic?,0
-Did Neeson star in Schindler’s List?,1
-Did Swank win the oscar in 2000?,1
-Is the Shining by Kubrik?,1
-Did a French actor win the oscar in 2012?,1
-Did a movie by Spielberg with Neeson win the oscar for best film?,1
-Did Madonna sing PapaDoNotPreach?,2
-Does the album Thriller include the track BeatIt?,2
-Was Beyonce born in the USA?,2
-Who directed Hugo?,1
-Which is the scary movie by Kubrik with Nicholson?,1
-Who won the oscar for the best actor in 2005?,1
-Which actress won the oscar in 2012?,1
-Who directed the best movie in 2010?,1
-In which continent does Canada lie?,0
-What is the capital of Spain?,0
-With which countries does France have a border?,0
-Which is the highest mountain in the world?,0
-Where is the highest mountain?,0
-Which is the deepest ocean?,0
-Which pop artist sings CrazyInLove?,2
-Where was Gaga born?,2
-In which album does Aura appear?,2
-Which album by Swift was released in 2014?,2
+Is Rome the capital of Italy?
+Is France in Europe?
+Is the Pacific deeper than the Atlantic?
+Did Neeson star in Schindler’s List?
+Did Swank win the oscar in 2000?
+Is the Shining by Kubrik?
+Did a French actor win the oscar in 2012?
+Did a movie by Spielberg with Neeson win the oscar for best film?
+Did Madonna sing PapaDoNotPreach?
+Does the album Thriller include the track BeatIt?
+Was Beyonce’ born in the USA?
+Who directed Hugo?
+Which is the scary movie by Kubrik with Nicholson?
+Who won the oscar for the best actor in 2005?
+Which actress won the oscar in 2012?
+Who directed the best movie in 2010?
+In which continent does Canada lie?
+What is the capital of Spain?
+With which countries does France have a border?
+Which is the highest mountain in the world?
+Where is the highest mountain?
+Which is the deepest ocean?
+Which pop artist sings CrazyInLove?
+Where was Gaga born?
+In which album does Aura appear?
+Which album by Swift was released in 2014?
+Which countries border France?
+Is K2 the highest mountain?
+Is Paris in Italy?
+What is the area of Asia?
+What is the highest elevation in Africa?
+What is the lowest depth in Europe?
+What is the population of Antarctica?
+What is the deepest point in the Pacific Ocean?
+What is the capital of Italy?
+Is Vienna the capital of Canada?

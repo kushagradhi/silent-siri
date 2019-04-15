@@ -43,7 +43,7 @@ def hasOnlyLocationTags(sentences):
 def getCategoryPredictions(sentences, tagIndicator):
     # category = ['movie', 'music']
     # category = ['geographical', 'cinema', 'music']
-    category = [['place', 'geographic', 'mountain', 'ocean'], ['cinema', 'direct', 'oscar', 'movie'], ['pop', 'music', 'musician', 'sing', 'album']]
+    category = [['place', 'geographic', 'mountain', 'ocean', 'hill'], ['cinema', 'direct', 'oscar', 'movie'], ['pop', 'music', 'sing', 'album']]
     tags=[]
     for index, sentence in enumerate(sentences):        #for all sentences
         scores=[]
@@ -84,11 +84,12 @@ def main():
     queries=[]
     labels=[]
     with open(queriesFile) as f:
-        lines = f.readlines()
-        for line in lines:
-            query, label = line.split(',') 
-            queries.append(query)
-            labels.append(label)
+        queries=f.readlines()
+        # lines = f.readlines()
+        # for line in lines:
+        #     query, label = line.split(',') 
+        #     queries.append(query)
+        #     labels.append(label)
     # print(queries)
     tags = hasOnlyLocationTags(queries)
 
