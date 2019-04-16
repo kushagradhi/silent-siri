@@ -17,7 +17,6 @@ def nerTagger(sentence):
 
 def hasOnlyLocationTags(sentences):
     geoTags=['O', 'CITY', 'COUNTRY', 'LOCATION']
-    nonGeoTags=['PERSON', 'NATIONALITY']
     tags = [0 for i in range(len(sentences))]
     for i, sentence in enumerate(sentences):
         onlyOTags = True
@@ -33,7 +32,9 @@ def hasOnlyLocationTags(sentences):
     return tags
 
 def getCategoryPredictions(sentences, tagIndicator):
-    category = [['place', 'geographic', 'mountain', 'ocean', 'hill'], ['cinema', 'direct', 'oscar', 'movie'], ['pop', 'music', 'sing', 'album']]
+    category = [['place', 'geographic', 'mountain', 'ocean', 'hill'],
+                ['cinema', 'direct', 'oscar', 'movie'],
+                ['pop', 'music', 'sing', 'album']]
     tags=[]
     for index, sentence in enumerate(sentences):        #for all sentences
         scores=[]
@@ -76,12 +77,4 @@ def main():
     for i in range(len(tags)):
         print ("Sentence: ",queries[i])
         print ("Category: ",DB(tags[i]).name,"\n")
-
-    # for i in range(len(tags)):
-    #     if i in nonGeoIndices:
-    #         print(f'{DB(tags[i]).name}: {queries[i]}')
-    # for i in range(len(tags)):
-    #     if i not in nonGeoIndices:
-    #         print(f'{DB(tags[i]).name}: {queries[i]}')
-
 main()
