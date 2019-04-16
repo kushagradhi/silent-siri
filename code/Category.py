@@ -4,18 +4,24 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize 
 from enum import Enum
 
+# Enum for Categories
 class DB(Enum):
     GEOGRAPHY = 0
     MOVIE = 1
     MUSIC = 2
 
+# Creates object for NER Tagger
 ner_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='ner')
-queriesFile = '../data//input.txt'
+queriesFile = '../data//input.txt'      # Input file containing all the sentences
 
+# Returns - NER tagged sentence
 def nerTagger(sentence):
     return list(ner_tagger.tag((sentence.split())))
 
-def hasOnlyLocationTags(sentences):
+"""Returns  1. 0  - If certain that belongs to Geography
+            2. -2 - If certain that belongs to Music/Movie
+            3. -3 - If uncertain about the category"""
+def getNERPrediction(sentences):
     geoTags=['O', 'CITY', 'COUNTRY', 'LOCATION']
     tags = [0 for i in range(len(sentences))]
     for i, sentence in enumerate(sentences):
@@ -31,26 +37,32 @@ def hasOnlyLocationTags(sentences):
             tags[i]=-3
     return tags
 
+""" Returns - Category to which each sentence belongs"""
 def getCategoryPredictions(sentences, tagIndicator):
+    # Subcategories for each category Geography, Movie, Music
     category = [['place', 'geographic', 'mountain', 'ocean', 'hill'],
                 ['cinema', 'direct', 'oscar', 'movie'],
                 ['pop', 'music', 'sing', 'album']]
     tags=[]
-    for index, sentence in enumerate(sentences):        #for all sentences
+    # Loop over every sentence in the input file
+    for index, sentence in enumerate(sentences):
         scores=[]
-        for cat_i in category:      #for all categories
-            for i in cat_i:     #for all subcategories
+        # Calculating Score for each Category
+        for cat_i in category:
+            # Calculating Score for each Sub Category
+            for i in cat_i:
                 score = 0
-                cat_synset = wn.synsets(i)[0]
-                for word in sentence.split():       #for all words in sentence
+                cat_synset = wn.synsets(i)[0]   # Synset of subcategory
+                # Computing word sysnset for each word in the sense
+                for word in sentence.split():
                     word_synsets = wn.synsets(word)
                     if(len(word_synsets)==0):
                         continue
                     word_synset = wn.synsets(word)[0]
                     if(word_synset.path_similarity(cat_synset) != None):
-                        score += word_synset.path_similarity(cat_synset)
-            scores.append(score/(len(cat_i)))
-        tagPrediction = scores.index(max(scores))
+                        score += word_synset.path_similarity(cat_synset) 
+            scores.append(score/(len(cat_i)))   # Taking average over all subcategories
+        tagPrediction = scores.index(max(scores))   # Selecting Category with highest score
         if(tagIndicator[index]==-2):
             if(scores[1]>scores[2]):
                 tagPrediction=1
@@ -61,20 +73,26 @@ def getCategoryPredictions(sentences, tagIndicator):
 
 def main():
     queries=[]
+    sentences = []
+    # Reading the input file
     with open(queriesFile) as f:
         queries=f.readlines()
-    tags = hasOnlyLocationTags(queries)
+        sentences = [sent.strip() for sent in queries]
+    tags = getNERPrediction(queries)    # Getting all catefgory prediction from NER
 
+    # Removing stopwords
     stop_words = set(stopwords.words('english')) 
     for i, query in enumerate(queries):
         queries[i] = " ".join([word for word in word_tokenize(query) if not word in stop_words])
 
+    # Computing category for each sentence
     nonGeoIndices = [i for i,el in enumerate(tags) if el!=0]
     tagsOthers = getCategoryPredictions([queries[i] for i in nonGeoIndices], [tags[i] for i in nonGeoIndices])
     for i in range(len(tagsOthers)):
         tags[nonGeoIndices[i]] = tagsOthers[i]
 
+    # Printing the result to console
     for i in range(len(tags)):
-        print ("Sentence: ",queries[i])
+        print ("Sentence: ",sentences[i])
         print ("Category: ",DB(tags[i]).name,"\n")
 main()
