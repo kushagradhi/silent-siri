@@ -4617,7 +4617,7 @@ id          name        year        rating      runtime     genre       earnings
 2582802     Whiplash    2014        R           107         D                        
 1065073     Boyhood     2014        R           165         D     
 
-Actor                   
+Oscar                   
 movie_id    person_id   type          year      
 ----------  ----------  ------------  ----------
 2562232                 BEST-PICTURE  2015      

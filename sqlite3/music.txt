@@ -11,6 +11,7 @@ albumID     artsitID    genreID     name                 releaseDate
 8           5           2           True Blue            1986-06-30 
 9           5           1           Rebel Heart          2015-03-06 
 
+
 Artist
 id          name        placeOfBith  dateOfBirth
 ----------  ----------  -----------  -----------
@@ -20,12 +21,14 @@ id          name        placeOfBith  dateOfBirth
 4           Taylor Swi  Reading, PA  1989-12-13 
 5           Madonna     Bay City, M  1958-08-16 
 
+
 Genres
 id          name      
 ----------  ----------
 1           rock      
 2           pop       
 3           dance     
+
 
 Track
 trackID     albumID     name         
