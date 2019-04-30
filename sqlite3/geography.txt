@@ -1,6 +1,8 @@
 Borders            Cities             Countries          Mountains        
 Capitals           Continents         CountryContinents  Seas             
 CREATE TABLE IF NOT EXISTS "Borders" ("Country1" INTEGER NOT NULL ,"Country2" INTEGER NOT NULL , PRIMARY KEY ("Country1","Country2") );
+
+Borders
 Country1    Country2  
 ----------  ----------
 1           6         
@@ -11,7 +13,10 @@ Country1    Country2
 2           7         
 2           8         
 3           9         
-4           6         
+4           6      
+
+
+Cities   
 Id          Name      
 ----------  ----------
 1           Paris     
@@ -23,6 +28,9 @@ Id          Name
 7           San Marino
 8           Vatican Ci
 9           Washington
+
+
+Countries
 Id          Name      
 ----------  ----------
 1           France    
@@ -34,6 +42,9 @@ Id          Name
 7           San Marino
 8           Vatican Ci
 9           USA       
+
+
+Mountains
 Id          Name           Height    
 ----------  -------------  ----------
 1           Mount Everest  8848      
@@ -41,7 +52,10 @@ Id          Name           Height
 3           Kangchenjunga  8586      
 4           Lhotse         8516      
 5           Makalu         8485      
-6           Cho Oyu        8201      
+6           Cho Oyu        8201    
+
+
+Capitals  
 CountryId   CityId    
 ----------  ----------
 1           1         
@@ -52,7 +66,10 @@ CountryId   CityId
 6           6         
 7           7         
 8           8         
-9           9         
+9           9      
+
+
+Continents   
 Id          Continent   Area_KM2    Population  Highest     Lowest    
 ----------  ----------  ----------  ----------  ----------  ----------
 1           Asia        43820000    3879000000  8848        -422      
@@ -62,6 +79,9 @@ Id          Continent   Area_KM2    Population  Highest     Lowest
 5           Antarctica  13720000    1000        4892        -2540     
 6           Europe      10180000    731000000   5633        -28       
 7           Australia   9008500     31260000    4884        -15       
+
+
+CountryContinents
 CountryId   ContinentId
 ----------  -----------
 1           6          
@@ -72,7 +92,10 @@ CountryId   ContinentId
 6           6          
 7           6          
 8           6          
-9           3          
+9           3    
+
+
+Seas      
 Id          Ocean         Deepest   
 ----------  ------------  ----------
 1           Arctic Ocean  5450      
