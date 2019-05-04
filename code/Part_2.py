@@ -19,11 +19,15 @@ queries = ["Did Neeson star in Schindler’s List?"]#, "Did Allen direct Mighty 
         #    "Which American actress won the oscar in 2012?", "Which movie won the oscar in 2000?", "When did Blanchett win an oscar for best actress?"
         # ]
 semAttachments = {"direct": (['P', 'M'],"Person P inner join Director D on D.director_id=P.id inner join Movie M on M.id=D.movie_id"),
+                "directed": (['P', 'M'],"Movie M join Director D on M.id = D.movie_id join Person P on P.id = D.director_id"),
+                "best": ([], "Oscar O "),
                 "star" : ([], "Person P inner join Actor A on P.id=A.actor_id inner join Movie M on A.movie_id=M.id"),
                 "win" : ([], "Oscar O inner join Movie M on O.movie_id=M.id inner join Person P on P.id=O.person_id"),
                 "won" : ([], "Oscar O inner join Movie M on O.movie_id=M.id inner join Person P on P.id=O.person_id"),
                 "PERSON": ([], 'P.name like "%<entity>%"'),
-                "MOVIE" : ([], 'M.name like "%<entity>%"')
+                "MOVIE" : ([], 'M.name like "%<entity>%"'),
+                "NATIONALITY" : {"FRENCH":"FRANCE", "ITALIAN":"ITALY", "AMERICAN":"USA", "BRITISH":"UK", "GERMAN":"GERMANY"},
+                "POB" : ([], 'P.pob like "%<entity>%"')
                 }
 
 
@@ -113,11 +117,21 @@ def buildQuery(parent, clauses):
             semval = ''.join([c for c in child])
             clauses["SENT"].append(semval)
             print(f'leafVal: {semval}')
-            if child.label() in ["VB", "VBD"]:
+            if child.label() in ["VB", "VBD", "VBP"] and semval.upper() not in ["DID"]:
                 semAttach = semAttachments[semval]
                 clauses["FROM"].append(semAttach[1])
+                if semval.upper() in ["WON", "DIRECTED"]: 
+                    if "movie" in clauses["NER"].keys():
+                        awrd = "picture"
+                    elif "actor"  in clauses["NER"].keys():
+                        awrd = "best-actor"
+                    elif "actress"  in clauses["NER"].keys():
+                        awrd = "best-actress"
+                    elif "director"  in clauses["NER"].keys():
+                        awrd = "director"
+                    clauses["WHERE"].append('O.type like "%<award>%"'.replace("<award>", awrd))
             elif child.label() in ["NNP"]:
-                if clauses["NER"][semval] == "PERSON":    #if NNP is director/actor etc
+                if clauses["NER"][semval] == "PERSON" and clauses["SENT"][-2].upper in ["DIRECTED"]:    #if NNP is director/actor etc
                     semAttach = semAttachments["PERSON"][1]  
                     print(type(semval), type(semAttach), semAttach)  
                     semAttach = semAttach.replace("<entity>", semval)
@@ -131,12 +145,21 @@ def buildQuery(parent, clauses):
                     clauses["WHERE"].append(semAttach)
             elif child.label() in ["IN"]:
                 clauses["SEMVAL"].append("IN")
+            elif child.label() in ["JJ"]:
+                if clauses["NER"][semval] == "NATIONALITY":
+                    c = semAttachments["NATIONALITY"][semval.upper()]
+                    semAttach = semAttachments["POB"][1]
+                    semAttach = semAttach.replace("<entity>", c)
+                    clauses["WHERE"].append(semAttach)
+                elif semval.upper() == "BEST":
+                    clauses["WHERE"]
             elif child.label() in ["CD"]:
-                if clauses["SENT"][-1].upper() == "IN":
+                if clauses["SENT"][-2].upper() == "IN":
                     if "born" in clauses["SENT"]:
-                        clauses["WHERE"].append("P.dob")
-                    elif "win" in clauses["SENT"]:
-                        clauses["WHERE"].append("O.year")
+                        clauses["WHERE"].append('P.dob like "%'+semval+'%"')
+                    elif "win" in clauses["SENT"] or "won" in clauses["SENT"] or "directed" in clauses["SENT"]:
+                        clauses["WHERE"].append('O.year like "%'+semval+'%"')
+
             elif child.label() in ["WP"]:        #Who question
                 clauses["SELECT"].append("P.name")  #but need to account for Music which has tablename Artist
             elif child.label() in ["WDT", "WRB"]:      #Which question, need to account for name/movie 
@@ -147,12 +170,6 @@ def buildQuery(parent, clauses):
                 pass
             
         
-        
-        
-        
-        
-
-            
     
 
 def getSQLQuery(sent):
@@ -184,7 +201,7 @@ with open('..//data//grammar.txt', 'w') as writer:
 
 # print(getGrammarRules(sent))
 
-q=getSQLQuery("Which movie won the oscar in 2000?")
+q=getSQLQuery("Who directed the best movie in 2010?")
 
 t=DBInterface()
 t.start()
