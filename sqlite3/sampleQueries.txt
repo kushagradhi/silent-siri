@@ -51,30 +51,50 @@ where P.name like "%Allen%" and
 
 
 Did Neeson star in Schindler’s List?
-
-
-
-
+select count(*)
+from Person P
+    inner join Actor A on P.id=A.actor_id
+    inner join Movie M on A.movie_id=M.id
+where P.name like "%Neeson%" and
+    M.name like "%Schindler’s List%"
+    
+    
+Did Swank win the oscar in 2000?
+select count(*)
+from Oscar O
+    inner join Movie M on O.movie_id=M.id
+    inner join Person P on P.id=O.person_id
+where P.name like Swank and
+    O.year like 2000
 
 
 _______________________________________________________________________________________
 
-Is 1+1 by Jackson?
+When did Blanchett win an oscar for best actress?
+select O.year
+from Person P 
+    inner join Oscar O on P.id=O.person_id
+where P.name like "%Blanchett%"
+    and O.type like "%actress%"
 
-Was Beyonce born in the USA?
 
 
+_______________________________________________________________________________________
 
 
 Did Madonna sing PapaDoNotPreach?
 
 Does the album Thriller include the track BeatIt?
 
+Was Beyonce born in the USA?
+
+
+
+
+
+Is 1+1 by Jackson?
+
 Did Madonna sing rock?
-
-
-
-
 
 When was Artpop released?
 
@@ -103,6 +123,13 @@ from Countries CO
 where CO.name like "%France%" and 
     CT.name like "%Europe%"
 
+
+What is the capital of Spain?
+select Cities.name
+from Cities 
+    inner join Capitals on Cities.id=Capitals.cityID
+    inner join Countries on Capitals.countryID=Countries.id
+where   Countries.name like "%Spain%"
 
 Is the Pacific deeper than the Atlantic?
     

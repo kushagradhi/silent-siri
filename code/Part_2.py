@@ -13,13 +13,15 @@ cnlp=CNLP()
 # sentences = [line.strip().split() for line in file.readlines()]
 # file.close()
 
-queries = ["Did Allen direct Mighty Aphrodite?"]#, "Is Kubrick a director?", "Was Loren born in Italy?", "Was Birdman the best movie in 2015?"
+queries = ["Did Neeson star in Schindler’s List?"]#, "Did Allen direct Mighty Aphrodite?", "Is Kubrick a director?", "Was Loren born in Italy?", "Was Birdman the best movie in 2015?"
         #    "Is Mighty Aphrodite by Allen?", "Did Neeson star in Schindler’s List?", "Did Swank win the oscar in 2000?", "Did a French actor win the oscar in 2012?",
         #    "Did a movie with Neeson win the oscar for best film?", "Who directed Schindler’s List?", "Who won the oscar for best actor in 2005?", "Who directed the best movie in 2010?",
         #    "Which American actress won the oscar in 2012?", "Which movie won the oscar in 2000?", "When did Blanchett win an oscar for best actress?"
         # ]
 semAttachments = {"direct": (['P', 'M'],"Person P inner join Director D on D.director_id=P.id inner join Movie M on M.id=D.movie_id"),
                 "star" : ([], "Person P inner join Actor A on P.id=A.actor_id inner join Movie M on A.movie_id=M.id"),
+                "win" : ([], "Oscar O inner join Movie M on O.movie_id=M.id inner join Person P on P.id=O.person_id"),
+                "won" : ([], "Oscar O inner join Movie M on O.movie_id=M.id inner join Person P on P.id=O.person_id"),
                 "PERSON": ([], 'P.name like "%<entity>%"'),
                 "MOVIE" : ([], 'M.name like "%<entity>%"')
                 }
@@ -64,8 +66,11 @@ def getGrammarRules(sent):
         grammar.append(rule.unicode_repr())
     return grammar
 
-'''Get the grammar production at parameter node, in the form: node -> child1 child2...'''
+
 def getProduction(node):
+    '''
+        Get the grammar production at parameter node, in the form: node -> child1 child2...
+    '''
     production = node.label() + " -> "
     for child in node:
         production += child.label() + " "
@@ -106,8 +111,9 @@ def buildQuery(parent, clauses):
         elif type(child) is nltk.Tree and child.height()==2:          
             print(f'if type(child) is tree==2, at childLabel {child.label()}')
             semval = ''.join([c for c in child])
+            clauses["SENT"].append(semval)
             print(f'leafVal: {semval}')
-            if child.label() in ["VB"]:
+            if child.label() in ["VB", "VBD"]:
                 semAttach = semAttachments[semval]
                 clauses["FROM"].append(semAttach[1])
             elif child.label() in ["NNP"]:
@@ -124,14 +130,18 @@ def buildQuery(parent, clauses):
                     semAttach = semAttach.replace("<entity>", semval)
                     clauses["WHERE"].append(semAttach)
             elif child.label() in ["IN"]:
-                pass
+                clauses["SEMVAL"].append("IN")
+            elif child.label() in ["CD"]:
+                if clauses["SENT"][-1].upper() == "IN":
+                    if "born" in clauses["SENT"]:
+                        clauses["WHERE"].append("P.dob")
+                    elif "win" in clauses["SENT"]:
+                        clauses["WHERE"].append("O.year")
             elif child.label() in ["WP"]:        #Who question
                 clauses["SELECT"].append("P.name")  #but need to account for Music which has tablename Artist
-            elif child.label() in ["WDT"]:      #Which question, need to account for name/movie
-                clauses["SELECT"].append("P.name")
-            elif child.label() in ["WRB"]:      #When question, need to account for name/movie
-                clauses["SELECT"].append("O.year") 
-            elif child.label() in ["VBD"]:      #When question, need to account for name/movie
+            elif child.label() in ["WDT", "WRB"]:      #Which question, need to account for name/movie 
+                clauses["SELECT"].append("P.name")      #When question, need to account for name/movie
+            elif child.label() in ["VBD"] and semval.upper() in ["DID"]:      #When question, need to account for name/movie
                 clauses["SELECT"].append("count(*)") 
             elif child.label() in ["."]:
                 pass
@@ -149,7 +159,7 @@ def getSQLQuery(sent):
     tree = next(getParseTree(sent))[0]         # get parse tree for query below "ROOT"
     # print(type(tree))
     # exit()
-    clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[], "NER":{key:value for (key,value) in cnlp.getNERTags(sent)}}
+    clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[], "NER":{key:value for (key,value) in cnlp.getNERTags(sent)}, "SENT":[]}
     for node in tree:
         print(node.label(), end=', ')
     print(f'\nbefore: {clauses}\n')
@@ -174,7 +184,7 @@ with open('..//data//grammar.txt', 'w') as writer:
 
 # print(getGrammarRules(sent))
 
-q=getSQLQuery('Did Allen direct Mighty Aphrodite?')
+q=getSQLQuery("Which movie won the oscar in 2000?")
 
 t=DBInterface()
 t.start()
