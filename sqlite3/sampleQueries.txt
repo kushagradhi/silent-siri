@@ -68,7 +68,28 @@ where P.name like Swank and
     O.year like 2000
 
 
+Did a movie with Neeson win the oscar for best film?
+select count(*)
+from Oscar O 
+    inner join Movie M on O.movie_id=M.id 
+    inner join Actor A on A.movie_id=M.id    
+    join Person P on A.actor_id=P.id    
+where P.name like "%Neeson%";
+where O.type like "%picture%"
 _______________________________________________________________________________________
+
+Who directed Schindler’s List?
+select P.name
+from Movie M
+join Director D on M.id = D.movie_id
+join Person P on P.id = D.director_id
+where M.name like '%Schindler%'
+
+Who won the oscar for best actor in 2005?
+select P.name
+from 
+
+
 
 When did Blanchett win an oscar for best actress?
 select O.year
