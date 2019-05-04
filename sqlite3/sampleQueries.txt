@@ -1,0 +1,108 @@
+Is Kubrick a director?
+(ROOT
+  (SQ (VBZ Is)
+    (NP (NNP Kubrick))
+    (NP (DT a) (NN director))
+    (. ?)))
+select count(*) 
+from Director D
+    inner join Person P on D.director_id = P.id
+where p.name like “%Kubrik%”
+
+
+
+Is MightyAphrodite by Allen?
+select count(*)
+from Movie M
+    inner join Person P on D.director_id = P.id
+    inner join Director D on D.movie_id = M.id
+where M.name like "%Aphrodite%" and
+    P.name like "%Allen%"     
+    
+  
+    
+Was Loren born in Italy?
+select count(*) 
+from Person P 
+where P.name like "%Loren%" and P.pob like "%Italy%"
+
+
+
+Was Birdman the best movie in 2015?
+select count(*) 
+from Movie M 
+    inner join Oscar O on M.id=O.movie_id 
+where M.name like "%Birdman%" and 
+    O.type like "%PICTURE%"
+    
+    
+    
+_______________________________________________________________________________________
+
+Did Allen direct MightyAphrodite?
+select count(*)
+from Person P
+    inner join Director D on D.director_id=P.id
+    inner join Movie M on M.id=D.movie_id
+where P.name like "%Allen%" and
+    M.name like "%Aphrodite%"
+
+
+
+
+Did Neeson star in Schindler’s List?
+
+
+
+
+
+
+_______________________________________________________________________________________
+
+Is 1+1 by Jackson?
+
+Was Beyonce born in the USA?
+
+
+
+
+Did Madonna sing PapaDoNotPreach?
+
+Does the album Thriller include the track BeatIt?
+
+Did Madonna sing rock?
+
+
+
+
+
+When was Artpop released?
+
+When was Beyonce born?
+
+Where was Gaga born?
+
+
+
+_______________________________________________________________________________________
+
+Is Rome the capital of Italy?
+select count(*)
+from Cities C
+    inner join Capitals CA on C.id = CA.cityID
+    inner join Countries CO on CO.id = CA.countryID
+where C.name like "%Rome%" and
+    CO.name like "%Italy%"
+
+
+Is France in Europe?
+select count(*)
+from Countries CO
+    inner join CountryContinent CC on CO.id=CC.Countryid
+    inner join Continent CT on CC.Continentid=CT.id
+where CO.name like "%France%" and 
+    CT.name like "%Europe%"
+
+
+Is the Pacific deeper than the Atlantic?
+    

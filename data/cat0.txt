@@ -1,0 +1,33 @@
+Sentence:  Is the Pacific deeper than the Atlantic?
+Category:  GEOGRAPHY 
+
+Sentence:  Did Swank win the oscar in 2000?
+Category:  MOVIE 
+
+Sentence:  Is the Shining by Kubrik?
+Category:  MOVIE 
+
+Sentence:  Does the album Thriller include the track BeatIt?
+Category:  MUSIC 
+
+Sentence:  Who directed Hugo?
+Category:  MOVIE 
+
+Sentence:  Which is the scary movie by Kubrik with Nicholson?
+Category:  MOVIE 
+
+Sentence:  In which continent does Canada lie?
+Category:  GEOGRAPHY 
+
+Sentence:  With which countries does France have a border?
+Category:  GEOGRAPHY 
+
+Sentence:  Where was Gaga born?
+Category:  MOVIE 
+
+Sentence:  In which album does Aura appear?
+Category:  MUSIC 
+
+Sentence:  Which album by Swift was released in 2014?
+Category:  MUSIC 
+

@@ -1,0 +1,12 @@
+. -> ?
+IN -> by
+NNP -> Allen
+NNP -> Aphrodite
+NNP -> Mighty
+NP -> NNP
+NP -> NNP
+NP -> NNP
+NP -> NP PP
+PP -> IN NP
+SQ -> VBZ NP NP .
+VBZ -> Is

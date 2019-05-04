@@ -23,7 +23,10 @@ class DBInterface:
             self.createCursors()
 
     def executeQuery(self, query, category):
-        return self.cursors[category].execute(query).fetchall()
+        try:
+            return self.cursors[category].execute(query).fetchall()
+        except sqlite3.OperationalError as opError:
+            return -1
 
     def closeConnections(self):
         for category in self.paths:
