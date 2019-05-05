@@ -1,0 +1,80 @@
+SUBMISSION GUIDELINES
+
+
+The TA will have a new set of questions ("test_input.txt" file) to test your code. For example. your code not only should work for "Is Kubrick a director?" or "Who directed Schindler’s List?" but also for "Is Carrey an actor?" or "Who directed Titanic?" as well. 
+
+The TA will run the following command in order to execute the turned in codes:
+java -jar <filename>.jar "input.txt"  
+OR 
+python <filename>.py "input.txt"
+
+INPUT: Main class/script  should get a text file path as input argument (argv[0] indicating path to "input.txt"). 
+Note: "input.txt" contains the list of questions, each line containing one question. 
+
+Which Italian actress won the oscar in 1962? 
+Did Bigelow win an oscar for best director?
+Does your code handle complex questions? 
+.
+.
+.
+
+ 
+OUTPUT: print the question, the SQL query, and the answer. A sample output example: 
+________________________________________________
+
+<QUESTION> Which Italian actress won the oscar in 1962? 
+
+<QUERY> 
+Select 	P.name 
+FROM 	Person P	INNER JOIN Oscar O ON P.id = person_id	INNER JOIN Actor A ON A.actor_id = person_idWHERE 	P.pob LIKE "%Italy%" AND O.year = "1962";
+
+<ANSWER> Sophia Loren
+
+
+
+<QUESTION> Did Bigelow win an oscar for best director?
+
+<QUERY> 
+Select 	Count(*) 
+FROM 	Oscar O	INNER JOIN Person P ON person_id = P.idWHERE 	P.name LIKE "%Bigelow%" AND O.type="BEST-DIRECTOR"
+
+<ANSWER> Yes
+
+
+
+<QUESTION> Does your code handle complex questions?
+
+<QUERY>
+
+<ANSWER> I do not know. 
+
+.
+.
+. 
+
+_________________________________________________
+
+What to turn in?
+
+Put all your materials such as report and code (+readme if required) in netID_1_netID_2 folder and submit the compressed version (netID_1_netID_2.zip) in Blackboard. 
+
+Report file (report_netID_1_netID_2.PDF): explain the implementation techniques (at least one page) and a sample output of the project 
+
+JAVA - You should Submit an executable jar file of your program. The name should be the net IDs of both members with an underscore in between. i.e. maliza2_bdieugen.jar 
+Your jar should run with the following command: java -jar <filename>.jar input.txt i.e. java -jar maliza2_bdieugen.jar "input.txt" 
+Eclipse has a built in feature, "Export", to create runnable jar files. Click the option to "Extract required libraries into generated JAR".
+http://docs.oracle.com/javase/tutorial/deployment/jar/build.html
+
+PYTHON - Similarly, The name of the main script should be the net IDs of both members with an underscore in between. i.e. maliza2_bdieugen.py 
+Your python script should run using the following command: python <filename>.py "input.txt" 
+
+
+For those of you using the Stanford tools (Parser, CoreNlp, ...), please do not include the .jar as it will make the final jar file very large. 
+instead I will assume your code gets them from a local directory /tools/stanford/ . Similarly, for OpenNLP (/tools/opennlp/) and NLTK (/tools/nltk/) if the model or package file is large (>10 MB)
+If the package or model is small (<10 MB), it is recommended to have a copy of it in your submission 
+
+If you use Stanford CoreNLP API in NLTK, you can assume the TA has Stanford CoreNLP service up and running at http://localhost:9000 
+
+In your submission, you need to explain in a README file about tools and required configurations in order to run your code 
+
+
