@@ -12,7 +12,8 @@ semAttachments = {"best": ([], "Oscar O "),
                 "PERSON": ([], 'P.name like "%<entity>%"'),
                 "MOVIE" : ([], 'M.name like "%<entity>%"'),
                 "NATIONALITY" : {"FRENCH":"FRANCE", "ITALIAN":"ITALY", "AMERICAN":"USA", "BRITISH":"UK", "GERMAN":"GERMANY"},
-                "POB" : ([], 'P.pob like "%<entity>%"')}
+                "POB" : ([], 'P.pob like "%<entity>%"'),
+                "PLACEOFBITH" : ([], 'P.placeOfBith like "%<entity>%"')}
 def getParseTree(sent):
     return cnlp.getParse(sent)
 
@@ -96,7 +97,10 @@ def semanticAttachmentVerbs(semval,clauses):
         check('Join Actor A on M.id = A.movie_id', clauses["TEST"])
         check('Join Person P on P.id = A.actor_id', clauses["TEST"])
     if sem_val in ['BORN']:
-        check('From Person P', clauses["TEST"])
+        if clauses["CAT"] == 'MOVIE':
+            check('From Person P', clauses["TEST"])
+        elif clauses["CAT"] == 'MUSIC':
+            check('From Artist P', clauses["TEST"])
 
     if sem_val in vbs:
         if "movie" in ner_keys:
@@ -124,7 +128,11 @@ def semanticAttachmentNounPhrase(semval,clauses):
         clauses["WHERE"].append(semAttach)
     elif clauses["NER"][semval] in ["COUNTRY", "CITY"]:
         if "born" in clauses["NER"].keys():
-            clauses["WHERE"].append('P.POB like "%<place>%"'.replace("<place>", semval))
+            if clauses['CAT'] == 'MOVIE':
+                colname = 'POB'
+            elif clauses['CAT'] == 'MUSIC':
+                colname = 'placeOfBith'
+            clauses["WHERE"].append('P.'+ colname +' like "%<place>%"'.replace("<place>", semval))
     else:  # if NNP is part of film name
         semAttach = semAttachments["MOVIE"][1]
         semAttach = semAttach.replace("<entity>", semval)
@@ -216,11 +224,11 @@ def buildQuery(parent, clauses):
                 pass
             
 
-def getSQLQuery(sent):
+def getSQLQuery(sent,category):
     tree = next(getParseTree(sent))[0]         # get parse tree for query below "ROOT"
     clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[],
                "NER":{key:value for (key,value) in cnlp.getNERTags(sent)},
-               "SENT":[],"TEST":[]}
+               "SENT":[],"TEST":[],"CAT":category}
     buildQuery(tree, clauses)
     query = concatSQLClauses(clauses)
     return query
@@ -233,11 +241,12 @@ file.close()
 t=DBInterface()
 t.start()
 file = open("output.txt","w")
+sentences = ['Was Beyonce born in the USA?']
 for line in sentences:
-    query = getSQLQuery(line)
+    query = getSQLQuery(line,'MUSIC')
     out = '\n' + line + '\n' + query +'\n'
     file.write(out)
-    eq = t.executeQuery(query, 'movie')
+    eq = t.executeQuery(query, 'MUSIC')
     if type(eq) == int:
         file.write(str(eq))
     else:

@@ -1,9 +1,9 @@
 import sqlite3
 
 class DBInterface:
-    paths = {'geo': '..//data//WorldGeography.sqlite',
-              'movie': '..//data//oscar-movie_imdb.sqlite',
-              'music': '..//data//music.sqlite'}
+    paths = {'GEO': '..//data//WorldGeography.sqlite',
+              'MOVIE': '..//data//oscar-movie_imdb.sqlite',
+              'MUSIC': '..//data//music.sqlite'}
 
     def __init__(self):
         self.connections = {}
