@@ -18,17 +18,11 @@ queries = ["Did Neeson star in Schindler’s List?"]#, "Did Allen direct Mighty 
         #    "Did a movie with Neeson win the oscar for best film?", "Who directed Schindler’s List?", "Who won the oscar for best actor in 2005?", "Who directed the best movie in 2010?",
         #    "Which American actress won the oscar in 2012?", "Which movie won the oscar in 2000?", "When did Blanchett win an oscar for best actress?"
         # ]
-semAttachments = {"direct": (['P', 'M'],"Person P inner join Director D on D.director_id=P.id inner join Movie M on M.id=D.movie_id"),
-                "directed": (['P', 'M'],"Movie M join Director D on M.id = D.movie_id join Person P on P.id = D.director_id"),
-                "best": ([], "Oscar O "),
-                "star" : ([], "Person P inner join Actor A on P.id=A.actor_id inner join Movie M on A.movie_id=M.id"),
-                "win" : ([], "Oscar O inner join Movie M on O.movie_id=M.id inner join Person P on P.id=O.person_id"),
-                "won" : ([], "Oscar O inner join Movie M on O.movie_id=M.id inner join Person P on P.id=O.person_id"),
+semAttachments = {"best": ([], "Oscar O "),
                 "PERSON": ([], 'P.name like "%<entity>%"'),
                 "MOVIE" : ([], 'M.name like "%<entity>%"'),
                 "NATIONALITY" : {"FRENCH":"FRANCE", "ITALIAN":"ITALY", "AMERICAN":"USA", "BRITISH":"UK", "GERMAN":"GERMANY"},
-                "POB" : ([], 'P.pob like "%<entity>%"')
-                }
+                "POB" : ([], 'P.pob like "%<entity>%"')}
 
 
 def getParseTree(sent):
@@ -85,9 +79,7 @@ def concatSQLClauses(clauses):
     query = "SELECT "
     for s in clauses["SELECT"]:
         query += s + " "
-    query += " FROM "
-    for f in clauses["FROM"]:
-            query += f + " "
+    query += " ".join(clauses["TEST"])
     query += " WHERE "
     for w in clauses["WHERE"]:
         query += w + " and "
@@ -96,6 +88,21 @@ def concatSQLClauses(clauses):
     print(f'\nquery concatenated:\n{query}')
     return query
 
+
+def check(string,clauses,add=True):
+
+    if (add):
+        if (len(clauses) == 0):
+            clauses.append(string)
+            return
+
+
+    for clause in clauses:
+        if clause==string:
+            return True
+    if (add):
+        clauses.append(string)
+    return False
 
 '''Recursively build SQL Query'''
 def buildQuery(parent, clauses):
@@ -111,61 +118,102 @@ def buildQuery(parent, clauses):
         if type(child) is nltk.Tree and child.height()!=2:
             print(f'if type(child) is tree>2, going down childLabel {child.label()}')
             buildQuery(child, clauses)
-            # productionAtCurrentNode=getProduction(child)
         elif type(child) is nltk.Tree and child.height()==2:          
             print(f'if type(child) is tree==2, at childLabel {child.label()}')
             semval = ''.join([c for c in child])
             clauses["SENT"].append(semval)
             print(f'leafVal: {semval}')
-            if child.label() in ["VB", "VBD", "VBP"] and semval.upper() not in ["DID"]:
-                semAttach = semAttachments[semval]
-                clauses["FROM"].append(semAttach[1])
-                if semval.upper() in ["WON", "DIRECTED"]: 
-                    if "movie" in clauses["NER"].keys():
-                        awrd = "picture"
-                    elif "actor"  in clauses["NER"].keys():
-                        awrd = "best-actor"
-                    elif "actress"  in clauses["NER"].keys():
-                        awrd = "best-actress"
-                    elif "director"  in clauses["NER"].keys():
-                        awrd = "director"
+            if child.label() in ["VB", "VBD", "VBP","VBN"] and semval.upper() not in ["DID","IS","WAS"]:
+                #semAttach = semAttachments[semval]
+                if semval.upper() in ["WON",'WIN']:
+                    check('From movie M', clauses["TEST"])
+                    check('Join oscar O on M.id = O.movie_id',clauses["TEST"])
+                if semval.upper() in ['DIRECTED','DIRECT']:
+                    check('From movie M', clauses["TEST"])
+                    check('Join Director D on M.id = D.movie_id',clauses["TEST"])
+                    check('Join Person P on P.id = D.director_id', clauses["TEST"])
+                if semval.upper() in ['STAR']:
+                    check('From movie M', clauses["TEST"])
+                    check('Join Actor A on M.id = A.movie_id',clauses["TEST"])
+                    check ('Join Person P on P.id = A.actor_id',clauses["TEST"])
+                if semval.upper() in ['BORN']:
+                    check('From Person P',clauses["TEST"])
+                awrd = None
+                if "movie" in clauses["NER"].keys() and semval.upper() in ["WON",'WIN','BEST','OSCAR']:
+                    awrd = "picture"
+                elif "actor" in clauses["NER"].keys() and semval.upper() in ["WON",'WIN','BEST','OSCAR']:
+                    awrd = "best-actor"
+                    check('Join Person P on P.id = O.person_id', clauses["TEST"])
+                elif "actress" in clauses["NER"].keys() and semval.upper() in ["WON",'WIN','BEST','OSCAR']:
+                    awrd = "best-actress"
+                    check('Join Person P on P.id = O.person_id', clauses["TEST"])
+                elif "director" in clauses["NER"].keys() and semval.upper() in ["WON",'WIN','BEST','OSCAR']:
+                    awrd = "director"
+                    check('Join Person P on P.id = O.person_id', clauses["TEST"])
+                elif "PERSON" in clauses["NER"].values() and semval.upper() in ["WON",'WIN','BEST','OSCAR']:
+                    check('Join Person P on P.id = O.person_id', clauses["TEST"])
+                if (awrd):
                     clauses["WHERE"].append('O.type like "%<award>%"'.replace("<award>", awrd))
             elif child.label() in ["NNP"]:
-                if clauses["NER"][semval] == "PERSON" and clauses["SENT"][-2].upper in ["DIRECTED"]:    #if NNP is director/actor etc
+                if clauses["NER"][semval] == "PERSON":
                     semAttach = semAttachments["PERSON"][1]  
                     print(type(semval), type(semAttach), semAttach)  
                     semAttach = semAttach.replace("<entity>", semval)
                     print(semAttach)
-                    clauses["WHERE"].append(semAttach)   
-                elif clauses["NER"][semval] == "LOCATION":       
-                    pass
+                    clauses["WHERE"].append(semAttach)
+                elif clauses["NER"][semval] in ["COUNTRY","CITY"]:
+                    if "born" in clauses["NER"].keys():
+                        clauses["WHERE"].append('P.POB like "%<place>%"'.replace("<place>", semval))
                 else:                                           # if NNP is part of film name
                     semAttach = semAttachments["MOVIE"][1]
                     semAttach = semAttach.replace("<entity>", semval)
                     clauses["WHERE"].append(semAttach)
+            elif child.label() in ["NN"]:
+                if clauses["NER"][semval] in ['TITLE'] and clauses['SENT'][0] in ['Is','Was']:
+                    if semval.upper() in ['ACTOR','ACTRESS']:
+                        check('From movie M', clauses["TEST"])
+                        check('JOIN Actor A on M.id = A.movie_id',clauses['TEST'])
+                        check('JOIN Person P on P.id = A.actor_id', clauses['TEST'])
+                    else:
+                        check('From movie M', clauses["TEST"])
+                        check('JOIN Director D on M.id = D.movie_id', clauses['TEST'])
+                        check('JOIN Person P on P.id = D.director_id', clauses['TEST'])
             elif child.label() in ["IN"]:
                 clauses["SEMVAL"].append("IN")
-            elif child.label() in ["JJ"]:
+                if (semval == 'by'):
+                    check('From movie M', clauses["TEST"])
+                    check('Join Director D on M.id = D.movie_id', clauses["TEST"])
+                    check('Join Person P on P.id = D.director_id', clauses["TEST"])
+            elif child.label() in ["JJ","JJS"]:
                 if clauses["NER"][semval] == "NATIONALITY":
                     c = semAttachments["NATIONALITY"][semval.upper()]
                     semAttach = semAttachments["POB"][1]
                     semAttach = semAttach.replace("<entity>", c)
                     clauses["WHERE"].append(semAttach)
                 elif semval.upper() == "BEST":
-                    clauses["WHERE"]
+                    check('From movie M', clauses["TEST"])
+                    check('Join oscar O on M.id = O.movie_id',clauses["TEST"])
             elif child.label() in ["CD"]:
                 if clauses["SENT"][-2].upper() == "IN":
                     if "born" in clauses["SENT"]:
                         clauses["WHERE"].append('P.dob like "%'+semval+'%"')
                     elif "win" in clauses["SENT"] or "won" in clauses["SENT"] or "directed" in clauses["SENT"]:
                         clauses["WHERE"].append('O.year like "%'+semval+'%"')
-
             elif child.label() in ["WP"]:        #Who question
                 clauses["SELECT"].append("P.name")  #but need to account for Music which has tablename Artist
-            elif child.label() in ["WDT", "WRB"]:      #Which question, need to account for name/movie 
-                clauses["SELECT"].append("P.name")      #When question, need to account for name/movie
-            elif child.label() in ["VBD"] and semval.upper() in ["DID"]:      #When question, need to account for name/movie
-                clauses["SELECT"].append("count(*)") 
+            elif child.label() in ["WDT", "WRB"]:      #Which question, need to account for name/movie
+                if "When" in clauses["NER"].keys():
+                    clauses["SELECT"].append("O.year")
+                elif "PERSON" in clauses["NER"].values():
+                    clauses["SELECT"].append("P.name")      #When question, need to account for name/movie
+                elif "movie" in clauses["NER"].keys():
+                    clauses["SELECT"].append("M.name")
+            elif child.label() in ["VBD","VBZ"] and semval.upper() in ["DID"]:      #When question, need to account for name/movie
+                if len(clauses["SELECT"]) == 0:
+                    clauses["SELECT"].append("count(*)")
+            elif child.label() in ["VBD","VBZ"] and semval.upper() in ["IS","WAS"]:
+                if len(clauses["SELECT"]) == 0:
+                    clauses["SELECT"].append("count(*)")
             elif child.label() in ["."]:
                 pass
             
@@ -176,7 +224,8 @@ def getSQLQuery(sent):
     tree = next(getParseTree(sent))[0]         # get parse tree for query below "ROOT"
     # print(type(tree))
     # exit()
-    clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[], "NER":{key:value for (key,value) in cnlp.getNERTags(sent)}, "SENT":[]}
+    clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[], "NER":{key:value for (key,value) in cnlp.getNERTags(sent)}, "SENT":[],
+               "TEST":[]}
     for node in tree:
         print(node.label(), end=', ')
     print(f'\nbefore: {clauses}\n')
@@ -201,7 +250,7 @@ with open('..//data//grammar.txt', 'w') as writer:
 
 # print(getGrammarRules(sent))
 
-q=getSQLQuery("Who directed the best movie in 2010?")
+q=getSQLQuery("Is Kubrick a director?")
 
 t=DBInterface()
 t.start()
