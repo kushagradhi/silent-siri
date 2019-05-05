@@ -1,12 +1,14 @@
 . -> ?
-IN -> by
-NNP -> Allen
-NNP -> Aphrodite
-NNP -> Mighty
+IN -> in
+NN -> List
+NNP -> Neeson
+NNP -> Schindler
 NP -> NNP
-NP -> NNP
-NP -> NNP
-NP -> NP PP
+NP -> NNP POS
+NP -> NP NN
+POS -> "s"
 PP -> IN NP
-SQ -> VBZ NP NP .
-VBZ -> Is
+SQ -> VBD NP VP .
+VB -> star
+VBD -> Did
+VP -> VB PP
