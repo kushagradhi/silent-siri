@@ -302,6 +302,23 @@ def getSQLQuery(sent,category):
 
 #Reading sentences from input file
 
+def executeSQL(sentence,category):
+    query = getSQLQuery(line, category)
+    eq = t.executeQuery(query, category)
+    return (query,eq)
+
+def writeToFile(file,category,sentence,query,eq):
+    out = '\n' + category + '||' + line + '\n' + query + '\n'
+    file.write(out)
+    if type(eq) == int:
+        if eq == -1:
+            file.write("Do not know")
+        else:
+            file.write(eq)
+    else:
+        for item in eq:
+            file.write(str(item[0]))
+
 arg_count = len(sys.argv) -1
 if arg_count == 1:
     filename = sys.argv[1]
@@ -314,35 +331,32 @@ tags=getCategory(sentences)
 t=DBInterface()
 t.start()
 
-def executeSQL(sentence,category):
-    query = getSQLQuery(line, DB(category))
-    eq = t.executeQuery(query, DB(category)
-    return query,eq
-
 file = open("output.txt","w")
 for i, line in enumerate(original):
-    tag = tags[i]).name
-    tags = ['GEOGRAPHY','MOVIE','MUSIC']
-    tags.remove(tag)
-    query,eq = executeSQL(line,tag,tags)
+    tag = DB(tags[i]).name
+    print(tag,'||',line)
+    categories = ['MOVIE','MUSIC','GEOGRAPHY']
+    categories.remove(tag)
+    query,eq = executeSQL(line,tag)
     if type(eq) == int:
         if eq == -1:
             stop = False
-            while len(tags) > 0 and stop = False:
-                tag = tag[0]
-                tags.remove(tag)
-                query,eq = executeSQL(line,tag,tags)
+            while len(categories) > 0 and stop == False:
+                tag = categories[0]
+                categories.remove(tag)
+                query,eq = executeSQL(line,tag)
                 if type(eq) == int and eq == -1:
-                    stop = False:
+                    stop = False
                 else:
                     stop = True
+                    writeToFile(file,tag,line,query, eq)
+            if stop == False:
+                writeToFile(file, tag, line, query, eq)
         else:
-            out = '\n' + DB(tags[i]).name + '||' + line + '\n' +  query +'\n'
-            file.write(out)
-            file.write(str(eq))
+             writeToFile(file,tag,line,query,eq)
     else:
-        for item in eq:
-            file.write(str(item[0]))
+        writeToFile(file, tag, line, query, eq)
+
 t.closeConnections()
 file.close()
 
