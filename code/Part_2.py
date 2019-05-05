@@ -3,7 +3,9 @@ import nltk
 from collections import OrderedDict
 from Tree import Node, printTree
 from DB_interface import DBInterface
-from Utils import CNLP
+from Utils import CNLP, DB
+import sys
+from Category import getCategory
 
 cnlp=CNLP()
 
@@ -299,19 +301,45 @@ def getSQLQuery(sent,category):
 
 
 #Reading sentences from input file
-file = open('../data//input.txt','r')
-sentences = [line.strip() for line in file.readlines()]
-file.close()
+
+arg_count = len(sys.argv) -1
+if arg_count == 1:
+    filename = sys.argv[1]
+
+with open(filename,'r') as file:
+    original = [line.strip() for line in file.readlines()]
+sentences=original.copy()
+tags=getCategory(sentences)
+
 t=DBInterface()
 t.start()
+
+def executeSQL(sentence,category):
+    query = getSQLQuery(line, DB(category))
+    eq = t.executeQuery(query, DB(category)
+    return query,eq
+
 file = open("output.txt","w")
-for line in sentences:
-    query = getSQLQuery(line,'GEOGRAPHY')
-    out = '\n' + line + '\n' + query +'\n'
-    file.write(out)
-    eq = t.executeQuery(query, 'GEOGRAPHY')
+for i, line in enumerate(original):
+    tag = tags[i]).name
+    tags = ['GEOGRAPHY','MOVIE','MUSIC']
+    tags.remove(tag)
+    query,eq = executeSQL(line,tag,tags)
     if type(eq) == int:
-        file.write(str(eq))
+        if eq == -1:
+            stop = False
+            while len(tags) > 0 and stop = False:
+                tag = tag[0]
+                tags.remove(tag)
+                query,eq = executeSQL(line,tag,tags)
+                if type(eq) == int and eq == -1:
+                    stop = False:
+                else:
+                    stop = True
+        else:
+            out = '\n' + DB(tags[i]).name + '||' + line + '\n' +  query +'\n'
+            file.write(out)
+            file.write(str(eq))
     else:
         for item in eq:
             file.write(str(item[0]))

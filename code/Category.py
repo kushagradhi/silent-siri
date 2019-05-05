@@ -2,21 +2,16 @@ from nltk.parse import CoreNLPParser
 from nltk.corpus import wordnet as wn
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize 
-from enum import Enum
+from DB_interface import DBInterface
+from Utils import CNLP, DB
 
-# Enum for Categories
-class DB(Enum):
-    GEOGRAPHY = 0
-    MOVIE = 1
-    MUSIC = 2
 
-# Creates object for NER Tagger
-ner_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='ner')
-queriesFile = '../data//input.txt'      # Input file containing all the sentences
+
+cnlp=CNLP()
 
 # Returns - NER tagged sentence
 def nerTagger(sentence):
-    return list(ner_tagger.tag((sentence.split())))
+    return list(cnlp.getNERTags((sentence.split())))
 
 """Returns  1. 0  - If certain that belongs to Geography
             2. -2 - If certain that belongs to Music/Movie
@@ -71,13 +66,7 @@ def getCategoryPredictions(sentences, tagIndicator):
         tags.append(tagPrediction)
     return tags
 
-def main():
-    queries=[]
-    sentences = []
-    # Reading the input file
-    with open(queriesFile) as f:
-        queries=f.readlines()
-        sentences = [sent.strip() for sent in queries]
+def getCategory(queries):
     tags = getNERPrediction(queries)    # Getting all catefgory prediction from NER
 
     # Removing stopwords
@@ -90,9 +79,21 @@ def main():
     tagsOthers = getCategoryPredictions([queries[i] for i in nonGeoIndices], [tags[i] for i in nonGeoIndices])
     for i in range(len(tagsOthers)):
         tags[nonGeoIndices[i]] = tagsOthers[i]
+    
+    return tags
+
+def main():
+    queries=[]
+    sentences = []
+    # Reading the input file
+    with open(queriesFile) as f:
+        queries=f.readlines()
+        sentences = [sent.strip() for sent in queries]
+
+    tags = getCategory(queries)
 
     # Printing the result to console
     for i in range(len(tags)):
         print ("Sentence: ",sentences[i])
         print ("Category: ",DB(tags[i]).name,"\n")
-main()
+# main()

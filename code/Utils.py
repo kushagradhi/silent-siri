@@ -1,4 +1,11 @@
 from nltk.parse.corenlp import CoreNLPParser, CoreNLPDependencyParser
+from enum import Enum
+
+# Enum for Categories
+class DB(Enum):
+    GEOGRAPHY = 0
+    MOVIE = 1
+    MUSIC = 2
 
 class CNLP:
     CNLPServerURL='http://localhost:9000'
