@@ -319,21 +319,25 @@ def executeSQL(sentence,category):
     eq = t.executeQuery(query, category)
     return (query,eq)
 
-def writeToFile(file,category,sentence,query,eq):
-
+def writeToFile(file,category,line,query,eq):
     if type(eq) == int:
         if eq == -1:
-            out = '\n\n' + line + '\n' + "Do not know"
+            out = '\n\n' + line + '\n' + "I Do not know"
             file.write(out)
-        else:
-            out = '\n\n' + category + '||' + line + '\n' + query + '\n'
-            file.write(out)
-            file.write(eq)
     else:
         out = '\n\n' + category + '||' + line + '\n' + query + '\n'
         file.write(out)
-        for item in eq:
-            file.write(str(item[0]))
+        if len(eq) == 0:
+            file.write('None')
+        else:
+            for item in eq:
+                out = item[0]
+                if type(out) == int and out < 1800: # For ensuring that it is not a date
+                    if out == 0:
+                        out = 'No'
+                    else:
+                        out = 'Yes'
+                file.write(str(out))
 
 arg_count = len(sys.argv) -1
 if arg_count == 1:
