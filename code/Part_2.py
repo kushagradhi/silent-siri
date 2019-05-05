@@ -61,7 +61,9 @@ def concatSQLClauses(clauses):
     for s in clauses["SELECT"]:
         query += s + " "
     query += " ".join(clauses["TEST"])
-    query += " WHERE "
+
+    if len(clauses["WHERE"]) > 0:
+        query += " WHERE "
     for w in clauses["WHERE"]:
         query += w + " and "
     query = query.rsplit("and ",1)[0]
@@ -103,7 +105,7 @@ def semanticAttachmentVerbs(semval,clauses):
             check('From Person P', clauses["TEST"])
         elif clauses["CAT"] == 'MUSIC':
             check('From Artist P', clauses["TEST"])
-    if sem_val in ['SING']:
+    if sem_val in ['SING','SINGS','SANG','SUNG']:
         check('From Album Al',clauses["TEST"])
         check('Join Track T on Al.albumID == T.albumID',clauses["TEST"])
         check('Join Artist P on P.id == Al.artsitID',clauses["TEST"])
@@ -170,10 +172,10 @@ def semanticAttachmentNoun(semval,clauses):
     if semval.upper() == "ALBUM":
         check('From Album Al',clauses["TEST"])
         idx = clauses['ORIGINAL'].index('album')
-        if (idx >= 0):
-            name = clauses['ORIGINAL'][idx+1]
-            if name not in ['by']:
-                clauses["WHERE"].append('Al.name like "%'+name+'%"')
+        # if (idx >= 0):
+        #     name = clauses['ORIGINAL'][idx+1]
+        #     if name not in ['by']:
+        #         clauses["WHERE"].append('Al.name like "%'+name+'%"')
     elif semval.upper() == "TRACK":
         check('Join Track T on Al.albumID == T.albumID',clauses["TEST"])
         idx = clauses['ORIGINAL'].index('track')
@@ -192,7 +194,7 @@ def semanticAttachmentIn(semval,clauses):
             check('From movie M', clauses["TEST"])
             check('Join Director D on M.id = D.movie_id', clauses["TEST"])
             check('Join Person P on P.id = D.director_id', clauses["TEST"])
-    elif clauses["CAT"] == 'MUSIC':
+    elif clauses["CAT"] == 'MUSIC' and semval=="by":
         check('From Album Al',clauses["TEST"])
         check('Join Artist P on P.id == Al.artsitID',clauses["TEST"])
 
@@ -216,6 +218,11 @@ def semanticAttachmentAdj(semval,clauses):
             awrd = "director"
         if (awrd):
             clauses["WHERE"].append('O.type like "%<award>%"'.replace("<award>", awrd))
+    elif clauses['CAT'] == "GEOGRAPHY":
+        if semval.upper() == "HIGHEST":
+            check('From Continents Con Order By Highest Desc LIMIT 1',clauses['TEST'])
+        elif semval.upper() == "DEEPEST":
+            check('From Seas Order By Deepest Desc LIMIT 1',clauses['TEST'])
 
 def semanticAttachmentCD(semval,clauses):
     if clauses["SENT"][-2].upper() == "IN":
@@ -234,11 +241,15 @@ def semanticAttachmentWH(semval,clauses):
         clauses["SELECT"].append("P.name")  # When question, need to account for name/movie
     elif "movie" in clauses["NER"].keys():
         clauses["SELECT"].append("M.name")
-    elif "Where" in clauses["NER"].keys():
+    elif clauses['CAT'] == "GEOGRAPHY" and "Where" in clauses["NER"].keys():
         if "CITY" in clauses["NER"].values():
             clauses['SELECT'].append("Cn.name")
         elif "COUNTRY" in clauses["NER"].values():
             clauses['SELECT'].append("Con.Continent")
+        elif "highest" in clauses["NER"].keys():
+            clauses['SELECT'].append("Con.Continent")
+        elif "deepest" in clauses["NER"].keys():
+            clauses['SELECT'].append("Seas.Ocean")
     elif "What" in clauses["NER"].keys():
         clauses['SELECT'].append("C.name")
     else:
@@ -252,19 +263,20 @@ def buildQuery(parent, clauses):
     for child in parent:
         if type(child) is nltk.Tree and child.height()!=2:
             isTitle = False
-            if child.label() =='SBAR' and childname=='VB':
+            if child.label() in ['SBAR','S'] and childname in ['VB','VBZ']:
                 isTitle = True
             childname = child.label()
-            if isTitle and clauses['SENT'][-1].upper() == 'SING':
+            if isTitle and clauses['SENT'][-1].upper() in ['SING','SINGS','SANG','SUNG']:
                 title =  " ".join(child.leaves()).strip()
                 clauses["WHERE"].append('T.name like "%'+title+'%"')
                 return
+
             buildQuery(child, clauses)
         elif type(child) is nltk.Tree and child.height()==2:
             childname = child.label()
             semval = ''.join([c for c in child])
             clauses["SENT"].append(semval)
-            if child.label() in ["VB", "VBD", "VBP","VBN"] and semval.upper() not in ["DID","IS","WAS"]:
+            if child.label() in ["VB", "VBD", "VBP","VBN",'VBZ'] and semval.upper() not in ["DOES","DID","IS","WAS"]:
                 semanticAttachmentVerbs(semval,clauses)
             elif child.label() in ["NNP"]:
                 semanticAttachmentNounPhrase(semval,clauses)
@@ -308,14 +320,18 @@ def executeSQL(sentence,category):
     return (query,eq)
 
 def writeToFile(file,category,sentence,query,eq):
-    out = '\n' + category + '||' + line + '\n' + query + '\n'
-    file.write(out)
+
     if type(eq) == int:
         if eq == -1:
-            file.write("Do not know")
+            out = '\n\n' + line + '\n' + "Do not know"
+            file.write(out)
         else:
+            out = '\n\n' + category + '||' + line + '\n' + query + '\n'
+            file.write(out)
             file.write(eq)
     else:
+        out = '\n\n' + category + '||' + line + '\n' + query + '\n'
+        file.write(out)
         for item in eq:
             file.write(str(item[0]))
 
@@ -334,7 +350,7 @@ t.start()
 file = open("output.txt","w")
 for i, line in enumerate(original):
     tag = DB(tags[i]).name
-    print(tag,'||',line)
+    #print(tag,'||',line)
     categories = ['MOVIE','MUSIC','GEOGRAPHY']
     categories.remove(tag)
     query,eq = executeSQL(line,tag)
@@ -351,7 +367,7 @@ for i, line in enumerate(original):
                     stop = True
                     writeToFile(file,tag,line,query, eq)
             if stop == False:
-                writeToFile(file, tag, line, query, eq)
+                writeToFile(file, "", line, "", eq)
         else:
              writeToFile(file,tag,line,query,eq)
     else:
