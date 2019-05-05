@@ -1,7 +1,7 @@
 import sqlite3
 
 class DBInterface:
-    paths = {'GEO': '..//data//WorldGeography.sqlite',
+    paths = {'GEOGRAPHY': '..//data//WorldGeography.sqlite',
               'MOVIE': '..//data//oscar-movie_imdb.sqlite',
               'MUSIC': '..//data//music.sqlite'}
 

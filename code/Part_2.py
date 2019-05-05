@@ -101,6 +101,10 @@ def semanticAttachmentVerbs(semval,clauses):
             check('From Person P', clauses["TEST"])
         elif clauses["CAT"] == 'MUSIC':
             check('From Artist P', clauses["TEST"])
+    if sem_val in ['SING']:
+        check('From Album Al',clauses["TEST"])
+        check('Join Track T on Al.albumID == T.albumID',clauses["TEST"])
+        check('Join Artist P on P.id == Al.artsitID',clauses["TEST"])
 
     if sem_val in vbs:
         if "movie" in ner_keys:
@@ -120,23 +124,36 @@ def semanticAttachmentVerbs(semval,clauses):
         clauses["WHERE"].append('O.type like "%<award>%"'.replace("<award>", awrd))
 
 def semanticAttachmentNounPhrase(semval,clauses):
-    if clauses["NER"][semval] == "PERSON":
-        semAttach = semAttachments["PERSON"][1]
-        # print(type(semval), type(semAttach), semAttach)
-        semAttach = semAttach.replace("<entity>", semval)
-        # print(semAttach)
-        clauses["WHERE"].append(semAttach)
-    elif clauses["NER"][semval] in ["COUNTRY", "CITY"]:
-        if "born" in clauses["NER"].keys():
-            if clauses['CAT'] == 'MOVIE':
-                colname = 'POB'
-            elif clauses['CAT'] == 'MUSIC':
-                colname = 'placeOfBith'
-            clauses["WHERE"].append('P.'+ colname +' like "%<place>%"'.replace("<place>", semval))
-    else:  # if NNP is part of film name
-        semAttach = semAttachments["MOVIE"][1]
-        semAttach = semAttach.replace("<entity>", semval)
-        clauses["WHERE"].append(semAttach)
+
+    if clauses['CAT'] in ['MOVIE','MUSIC']:
+        if clauses["NER"][semval] == "PERSON":
+            semAttach = semAttachments["PERSON"][1]
+            semAttach = semAttach.replace("<entity>", semval)
+            clauses["WHERE"].append(semAttach)
+        elif clauses["NER"][semval] in ["COUNTRY", "CITY"]:
+            if "born" in clauses["NER"].keys():
+                if clauses['CAT'] == 'MOVIE':
+                    colname = 'POB'
+                elif clauses['CAT'] == 'MUSIC':
+                    colname = 'placeOfBith'
+                clauses["WHERE"].append('P.'+ colname +' like "%<place>%"'.replace("<place>", semval))
+        else: 
+            semAttach = semAttachments["MOVIE"][1]
+            semAttach = semAttach.replace("<entity>", semval)
+            clauses["WHERE"].append(semAttach)
+    else:
+        if clauses['NER'][semval] == 'CITY':
+            if not check('From Countries Cn',clauses['TEST'],False):
+                check('From Cities C',clauses['TEST'])
+            check('Join Capitals Cap on C.id == Cap.CityID',clauses['TEST'])
+            check('Join Countries Cn on Cn.id == Cap.CountryID',clauses['TEST'])
+            clauses['WHERE'].append('C.name like "%'+semval+'%"')
+        elif clauses['NER'][semval] == 'COUNTRY':
+            if not check('From Cities C',clauses['TEST'],False):
+                check('From Countries Cn',clauses['TEST'])
+            check('Join CountryContinents CC on CC.CountryID == Cn.ID',clauses['TEST'])
+            check('Join Continents Con on Con.id == CC.ContinentID',clauses['TEST'])
+            clauses['WHERE'].append('Cn.name like "%'+semval+'%"')
 
 def semanticAttachmentNoun(semval,clauses):
     if clauses["NER"][semval] in ['TITLE'] and clauses['SENT'][0] in ['Is', 'Was']:
@@ -148,12 +165,34 @@ def semanticAttachmentNoun(semval,clauses):
             check('From movie M', clauses["TEST"])
             check('JOIN Director D on M.id = D.movie_id', clauses['TEST'])
             check('JOIN Person P on P.id = D.director_id', clauses['TEST'])
+    if semval.upper() == "ALBUM":
+        check('From Album Al',clauses["TEST"])
+        idx = clauses['ORIGINAL'].index('album')
+        if (idx >= 0):
+            name = clauses['ORIGINAL'][idx+1]
+            if name not in ['by']:
+                clauses["WHERE"].append('Al.name like "%'+name+'%"')
+    elif semval.upper() == "TRACK":
+        check('Join Track T on Al.albumID == T.albumID',clauses["TEST"])
+        idx = clauses['ORIGINAL'].index('track')
+        if (idx >= 0):
+            name = clauses['ORIGINAL'][idx+1]
+            if name not in ['by']:
+                clauses["WHERE"].append('T.name like "%'+name+'%"')
+    if semval.upper() == "CAPITAL":
+        check('From Cities C',clauses['TEST'])
+        check('Join Capitals Cap on C.id == Cap.CityID',clauses['TEST'])
+        check('Join Countries Cn on Cn.id == Cap.CountryID',clauses['TEST'])
 
 def semanticAttachmentIn(semval,clauses):
-    if (semval == 'by'):
-        check('From movie M', clauses["TEST"])
-        check('Join Director D on M.id = D.movie_id', clauses["TEST"])
-        check('Join Person P on P.id = D.director_id', clauses["TEST"])
+    if clauses["CAT"] == 'MOVIE':
+        if (semval == 'by'):
+            check('From movie M', clauses["TEST"])
+            check('Join Director D on M.id = D.movie_id', clauses["TEST"])
+            check('Join Person P on P.id = D.director_id', clauses["TEST"])
+    elif clauses["CAT"] == 'MUSIC':
+        check('From Album Al',clauses["TEST"])
+        check('Join Artist P on P.id == Al.artsitID',clauses["TEST"])
 
 def semanticAttachmentAdj(semval,clauses):
     if clauses["NER"][semval] == "NATIONALITY":
@@ -182,6 +221,9 @@ def semanticAttachmentCD(semval,clauses):
             clauses["WHERE"].append('P.dob like "%' + semval + '%"')
         elif "win" in clauses["SENT"] or "won" in clauses["SENT"] or "directed" in clauses["SENT"]:
             clauses["WHERE"].append('O.year like "%' + semval + '%"')
+        elif clauses['CAT'] == 'MUSIC':
+            if 'released' in clauses["SENT"] or 'release' in clauses["SENT"]:
+                clauses["WHERE"].append('Al.releaseDate like "%'+semval+'%"')
 
 def semanticAttachmentWH(semval,clauses):
     if "When" in clauses["NER"].keys():
@@ -190,15 +232,34 @@ def semanticAttachmentWH(semval,clauses):
         clauses["SELECT"].append("P.name")  # When question, need to account for name/movie
     elif "movie" in clauses["NER"].keys():
         clauses["SELECT"].append("M.name")
+    elif "Where" in clauses["NER"].keys():
+        if "CITY" in clauses["NER"].values():
+            clauses['SELECT'].append("Cn.name")
+        elif "COUNTRY" in clauses["NER"].values():
+            clauses['SELECT'].append("Con.Continent")
+    elif "What" in clauses["NER"].keys():
+        clauses['SELECT'].append("C.name")
     else:
         clauses["SELECT"].append("P.name")
 
+
+
 '''Recursively build SQL Query'''
 def buildQuery(parent, clauses):
+    childname = ''
     for child in parent:
         if type(child) is nltk.Tree and child.height()!=2:
+            isTitle = False
+            if child.label() =='SBAR' and childname=='VB':
+                isTitle = True
+            childname = child.label()
+            if isTitle and clauses['SENT'][-1].upper() == 'SING':
+                title =  " ".join(child.leaves()).strip()
+                clauses["WHERE"].append('T.name like "%'+title+'%"')
+                return
             buildQuery(child, clauses)
         elif type(child) is nltk.Tree and child.height()==2:
+            childname = child.label()
             semval = ''.join([c for c in child])
             clauses["SENT"].append(semval)
             if child.label() in ["VB", "VBD", "VBP","VBN"] and semval.upper() not in ["DID","IS","WAS"]:
@@ -214,10 +275,13 @@ def buildQuery(parent, clauses):
             elif child.label() in ["CD"]:
                 semanticAttachmentCD(semval, clauses)
             elif child.label() in ["WP"]:
-                clauses["SELECT"].append("P.name")
+                if clauses['CAT'] == 'GEOGRAPHY':
+                    semanticAttachmentWH(semval,clauses)
+                else:
+                    clauses["SELECT"].append("P.name")
             elif child.label() in ["WDT", "WRB"]:
                 semanticAttachmentWH(semval, clauses)
-            elif child.label() in ["VBD","VBZ"] and semval.upper() in ["DID","IS","WAS"]:
+            elif child.label() in ["VBD","VBZ"] and semval.upper() in ["DOES","DID","IS","WAS"]:
                 if len(clauses["SELECT"]) == 0:
                     clauses["SELECT"].append("count(*)")
             elif child.label() in ["."]:
@@ -228,7 +292,7 @@ def getSQLQuery(sent,category):
     tree = next(getParseTree(sent))[0]         # get parse tree for query below "ROOT"
     clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[],
                "NER":{key:value for (key,value) in cnlp.getNERTags(sent)},
-               "SENT":[],"TEST":[],"CAT":category}
+               "SENT":[],"TEST":[],"CAT":category,"ORIGINAL":sent.split()}
     buildQuery(tree, clauses)
     query = concatSQLClauses(clauses)
     return query
@@ -241,12 +305,11 @@ file.close()
 t=DBInterface()
 t.start()
 file = open("output.txt","w")
-sentences = ['Was Beyonce born in the USA?']
 for line in sentences:
-    query = getSQLQuery(line,'MUSIC')
+    query = getSQLQuery(line,'GEOGRAPHY')
     out = '\n' + line + '\n' + query +'\n'
     file.write(out)
-    eq = t.executeQuery(query, 'MUSIC')
+    eq = t.executeQuery(query, 'GEOGRAPHY')
     if type(eq) == int:
         file.write(str(eq))
     else:
