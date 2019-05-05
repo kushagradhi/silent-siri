@@ -1,70 +1,31 @@
 
-MOVIE||Is Kubrick a director?
-SELECT count(*) From movie M JOIN Director D on M.id = D.movie_id JOIN Person P on P.id = D.director_id WHERE P.name like "%Kubrick%"  ;
-1
-MOVIE||Is Mighty Aphrodite by Allen?
-SELECT count(*) From movie M Join Director D on M.id = D.movie_id Join Person P on P.id = D.director_id WHERE M.name like "%Mighty%" and M.name like "%Aphrodite%" and P.name like "%Allen%"  ;
-1
-MUSIC||Was Loren born in Italy?
-SELECT count(*) From Artist P From Album Al Join Artist P on P.id == Al.artsitID WHERE P.name like "%Loren%" and P.placeOfBith like "%Italy%"  ;
--1
-MOVIE||Was Birdman the best movie in 2015?
-SELECT count(*) From movie M Join oscar O on M.id = O.movie_id WHERE M.name like "%Birdman%" and O.type like "%picture%"  ;
-1
-MOVIE||Did Neeson star in Schindler's List?
-SELECT count(*) From movie M Join Actor A on M.id = A.movie_id Join Person P on P.id = A.actor_id WHERE P.name like "%Neeson%" and M.name like "%Schindler%"  ;
-1
-MOVIE||Did Swank win the oscar in 2000?
-SELECT count(*) From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.name like "%Swank%" and O.year like "%2000%"  ;
-1
-MOVIE||Did a French actor win the oscar in 2012?
-SELECT count(*) From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.pob like "%FRANCE%" and O.type like "%best-actor%" and O.year like "%2012%"  ;
-1
-MOVIE||Did a movie with Neeson win the oscar for best film?
-SELECT count(*) From movie M Join oscar O on M.id = O.movie_id WHERE P.name like "%Neeson%" and O.type like "%picture%" and O.type like "%picture%"  ;
--1
-MOVIE||Who directed Schindler's List?
-SELECT P.name From movie M Join Director D on M.id = D.movie_id Join Person P on P.id = D.director_id WHERE P.name like "%Schindler%"  ;
 
-MOVIE||Who won the oscar for best actor in 2005?
-SELECT P.name From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE O.type like "%best-actor%" and O.type like "%best-actor%" and O.year like "%2005%"  ;
-Jamie Foxx
-MOVIE||Who directed the best movie in 2010?
-SELECT P.name From movie M Join Director D on M.id = D.movie_id Join Person P on P.id = D.director_id Join oscar O on M.id = O.movie_id WHERE O.type like "%picture%" and O.year like "%2010%"  ;
-Kathryn Bigelow
-MOVIE||Which American actress won the oscar in 2012?
-SELECT P.name From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.pob like "%USA%" and O.type like "%best-actress%" and O.year like "%2012%"  ;
-Meryl Streep
-MOVIE||Which movie won the oscar in 2000?
-SELECT M.name From movie M Join oscar O on M.id = O.movie_id WHERE O.type like "%picture%" and O.year like "%2000%"  ;
-American Beauty
-MOVIE||When did Blanchett win an oscar for best actress?
-SELECT O.year From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.name like "%Blanchett%" and O.type like "%best-actress%" and O.type like "%best-actress%"  ;
-2014
-MOVIE||Did Hathaway win an oscar in 2013?
-SELECT count(*) From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.name like "%Hathaway%" and O.year like "%2013%"  ;
-1
-MOVIE||Did Hathaway win the oscar for best actress in 2013?
-SELECT count(*) From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.name like "%Hathaway%" and O.type like "%best-actress%" and O.type like "%best-actress%" and O.year like "%2013%"  ;
-0
-MOVIE||Did Madonna sing Papa Do Not Preach?
-SELECT count(*) From Album Al Join Track T on Al.albumID == T.albumID Join Artist P on P.id == Al.artsitID WHERE P.name like "%Madonna%" and T.name like "%Papa Do Not Preach%"  ;
--1
-MUSIC||Does the album Thriller include the track Beat It?
-SELECT count(*) From Album Al Join Track T on Al.albumID == T.albumID WHERE Al.name like "%Thriller%" and T.name like "%Beat%"  ;
-1
-MUSIC||Was Beyonce' born in the USA?
-SELECT count(*) From Artist P From Album Al Join Artist P on P.id == Al.artsitID WHERE P.name like "%Beyonce%" and P.placeOfBith like "%USA%"  ;
--1
-GEOGRAPHY||Is Rome the capital of Italy?
-SELECT count(*) From Cities C Join Capitals Cap on C.id == Cap.CityID Join Countries Cn on Cn.id == Cap.CountryID Join CountryContinents CC on CC.CountryID == Cn.ID Join Continents Con on Con.id == CC.ContinentID WHERE C.name like "%Rome%" and Cn.name like "%Italy%"  ;
-1
-GEOGRAPHY||Is France in Europe?
-SELECT count(*) From Countries Cn Join CountryContinents CC on CC.CountryID == Cn.ID Join Continents Con on Con.id == CC.ContinentID WHERE Cn.name like "%France%"  ;
-1
-GEOGRAPHY||What is the capital of Spain?
-SELECT C.name From Cities C Join Capitals Cap on C.id == Cap.CityID Join Countries Cn on Cn.id == Cap.CountryID Join CountryContinents CC on CC.CountryID == Cn.ID Join Continents Con on Con.id == CC.ContinentID WHERE Cn.name like "%Spain%"  ;
+<Question> Is France in Europe?
 
-GEOGRAPHY||Where is Rome?
-SELECT Cn.name From Cities C Join Capitals Cap on C.id == Cap.CityID Join Countries Cn on Cn.id == Cap.CountryID WHERE C.name like "%Rome%"  ;
-Italy
+<Query> SELECT count(*) From Countries Cn Join CountryContinents CC on CC.CountryID == Cn.ID Join Continents Con on Con.id == CC.ContinentID WHERE Cn.name like "%France%" ;
+<Answer>Yes
+
+<Question> Did Bigelow win an oscar for best director?
+
+<Query> SELECT count(*) From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.name like "%Bigelow%" and O.type like "%director%" and O.type like "%director%" ;
+<Answer>Yes
+
+<Question> Did Madonna sing Papa Do Not Preach?
+
+<Query> SELECT count(*) From Album Al Join Track T on Al.albumID == T.albumID Join Artist P on P.id == Al.artsitID WHERE P.name like "%Madonna%" and T.name like "%Papa Do Not Preach%" ;
+<Answer>Yes
+
+<Question> Where is Rome?
+
+<Query> SELECT Cn.name From Cities C Join Capitals Cap on C.id == Cap.CityID Join Countries Cn on Cn.id == Cap.CountryID WHERE C.name like "%Rome%" ;
+<Answer>Italy
+
+<Question> Which Italian actress won the oscar in 1962?
+
+<Query> SELECT P.name From movie M Join oscar O on M.id = O.movie_id Join Person P on P.id = O.person_id WHERE P.pob like "%ITALY%" and O.type like "%best-actress%" and O.year like "%1962%" ;
+<Answer>Sophia Loren
+
+<Question> Which album released in 2003?
+
+<Query> SELECT Al.name From Album Al WHERE Al.releaseDate like "%2003%" ;
+<Answer>Dangerously in Love

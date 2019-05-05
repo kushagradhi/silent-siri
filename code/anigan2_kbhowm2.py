@@ -7,6 +7,7 @@ from Utils import CNLP, DB
 import sys
 from Category import getCategory
 
+#object provifing wrappers for the Stanford CoreNLP Parsers
 cnlp=CNLP()
 
 
@@ -57,6 +58,9 @@ def getProduction(node):
 
 
 def concatSQLClauses(clauses):
+    '''
+    Builds and returns a properly formated SQL query from the various sub-clauses generated from a sentence.
+    '''
     query = "SELECT "
     for s in clauses["SELECT"]:
         query += s + " "
@@ -67,11 +71,11 @@ def concatSQLClauses(clauses):
     for w in clauses["WHERE"]:
         query += w + " and "
     query = query.rsplit("and ",1)[0]
-    query += " ;"
+    query += ";"
     return query
 
-def check(string,clauses,add=True):
 
+def check(string,clauses,add=True):
     if (add):
         if (len(clauses) == 0):
             clauses.append(string)
@@ -83,7 +87,10 @@ def check(string,clauses,add=True):
         clauses.append(string)
     return False
 
-def semanticAttachmentVerbs(semval,clauses):
+
+def semanticAttachmentVerbs(semval,clauses):    
+    ''' Semantic Attachments for Verbs'''
+
     awrd = None
     vbs = ["WON", 'WIN']
     ner_keys = clauses["NER"].keys()
@@ -127,7 +134,9 @@ def semanticAttachmentVerbs(semval,clauses):
     if (awrd):
         clauses["WHERE"].append('O.type like "%<award>%"'.replace("<award>", awrd))
 
+
 def semanticAttachmentNounPhrase(semval,clauses):
+    ''' Semantic Attachments for Noun phrases'''
 
     if clauses['CAT'] in ['MOVIE','MUSIC']:
         if clauses["NER"][semval] == "PERSON":
@@ -159,7 +168,10 @@ def semanticAttachmentNounPhrase(semval,clauses):
             check('Join Continents Con on Con.id == CC.ContinentID',clauses['TEST'])
             clauses['WHERE'].append('Cn.name like "%'+semval+'%"')
 
+
 def semanticAttachmentNoun(semval,clauses):
+    '''Semantic Attachment for Noun'''
+
     if clauses["NER"][semval] in ['TITLE'] and clauses['SENT'][0] in ['Is', 'Was']:
         if semval.upper() in ['ACTOR', 'ACTRESS']:
             check('From movie M', clauses["TEST"])
@@ -172,10 +184,10 @@ def semanticAttachmentNoun(semval,clauses):
     if semval.upper() == "ALBUM":
         check('From Album Al',clauses["TEST"])
         idx = clauses['ORIGINAL'].index('album')
-        # if (idx >= 0):
-        #     name = clauses['ORIGINAL'][idx+1]
-        #     if name not in ['by']:
-        #         clauses["WHERE"].append('Al.name like "%'+name+'%"')
+        if (idx >= 0):
+            name = clauses['ORIGINAL'][idx+1]
+            if name not in ['by']:
+                clauses["WHERE"].append('Al.name like "%'+name+'%"')
     elif semval.upper() == "TRACK":
         check('Join Track T on Al.albumID == T.albumID',clauses["TEST"])
         idx = clauses['ORIGINAL'].index('track')
@@ -188,7 +200,10 @@ def semanticAttachmentNoun(semval,clauses):
         check('Join Capitals Cap on C.id == Cap.CityID',clauses['TEST'])
         check('Join Countries Cn on Cn.id == Cap.CountryID',clauses['TEST'])
 
+
 def semanticAttachmentIn(semval,clauses):
+    '''Semantic Attachment for Preposition'''
+
     if clauses["CAT"] == 'MOVIE':
         if (semval == 'by'):
             check('From movie M', clauses["TEST"])
@@ -199,6 +214,8 @@ def semanticAttachmentIn(semval,clauses):
         check('Join Artist P on P.id == Al.artsitID',clauses["TEST"])
 
 def semanticAttachmentAdj(semval,clauses):
+    '''Semantic Attachment for Adjective'''
+
     if clauses["NER"][semval] == "NATIONALITY":
         c = semAttachments["NATIONALITY"][semval.upper()]
         semAttach = semAttachments["POB"][1]
@@ -225,6 +242,8 @@ def semanticAttachmentAdj(semval,clauses):
             check('From Seas Order By Deepest Desc LIMIT 1',clauses['TEST'])
 
 def semanticAttachmentCD(semval,clauses):
+    '''Semantic Attachment for Cardinal Numbers'''
+
     if clauses["SENT"][-2].upper() == "IN":
         if "born" in clauses["SENT"]:
             clauses["WHERE"].append('P.dob like "%' + semval + '%"')
@@ -235,12 +254,16 @@ def semanticAttachmentCD(semval,clauses):
                 clauses["WHERE"].append('Al.releaseDate like "%'+semval+'%"')
 
 def semanticAttachmentWH(semval,clauses):
+    '''Semantic Attachment for Who/Where/When etc'''
+
     if "When" in clauses["NER"].keys():
         clauses["SELECT"].append("O.year")
     elif "PERSON" in clauses["NER"].values():
-        clauses["SELECT"].append("P.name")  # When question, need to account for name/movie
+        clauses["SELECT"].append("P.name")  
     elif "movie" in clauses["NER"].keys():
         clauses["SELECT"].append("M.name")
+    elif "album" in clauses["NER"].keys():
+        clauses["SELECT"].append("Al.name")
     elif clauses['CAT'] == "GEOGRAPHY" and "Where" in clauses["NER"].keys():
         if "CITY" in clauses["NER"].values():
             clauses['SELECT'].append("Cn.name")
@@ -257,8 +280,9 @@ def semanticAttachmentWH(semval,clauses):
 
 
 
-'''Recursively build SQL Query'''
+
 def buildQuery(parent, clauses):
+    '''Recursively build SQL Query'''
     childname = ''
     for child in parent:
         if type(child) is nltk.Tree and child.height()!=2:
@@ -303,6 +327,7 @@ def buildQuery(parent, clauses):
             
 
 def getSQLQuery(sent,category):
+    '''Returns the SQL Query to be executed'''
     tree = next(getParseTree(sent))[0]         # get parse tree for query below "ROOT"
     clauses = {"FROM":[], "SELECT": [], "WHERE":[], "SEMVAL":[],
                "NER":{key:value for (key,value) in cnlp.getNERTags(sent)},
@@ -313,22 +338,27 @@ def getSQLQuery(sent,category):
 
 
 #Reading sentences from input file
-
 def executeSQL(sentence,category):
+    '''Execute the sql query and return the query and result'''
     query = getSQLQuery(line, category)
     eq = t.executeQuery(query, category)
     return (query,eq)
 
+
 def writeToFile(file,category,line,query,eq):
+    ''' Print the result to command prompt and file'''
     if type(eq) == int:
         if eq == -1:
-            out = '\n\n' + line + '\n' + "I Do not know"
+            out = '\n\n<Question> ' + line + '\n\n' + "<Query>\n<Answer> I Do not know"
             file.write(out)
+            print(out)
     else:
-        out = '\n\n' + category + '||' + line + '\n' + query + '\n'
+        out = '\n\n<Question> '+ line + '\n\n<Query> ' + query + '\n'
         file.write(out)
+        print(out)
         if len(eq) == 0:
-            file.write('None')
+            file.write('<Answer> None')
+            print('<Answer> None')
         else:
             for item in eq:
                 out = item[0]
@@ -337,8 +367,12 @@ def writeToFile(file,category,line,query,eq):
                         out = 'No'
                     else:
                         out = 'Yes'
-                file.write(str(out))
+                wr = '<Answer>' + str(out)
+                file.write(wr)
+                print(wr)
 
+'''Reading from command promp the filename, parsing it and then converting
+    it to its corressponding SQL Query'''
 arg_count = len(sys.argv) -1
 if arg_count == 1:
     filename = sys.argv[1]
@@ -357,7 +391,7 @@ for i, line in enumerate(original):
     #print(tag,'||',line)
     categories = ['MOVIE','MUSIC','GEOGRAPHY']
     categories.remove(tag)
-    query,eq = executeSQL(line,tag)
+    query, eq = executeSQL(line,tag)
     if type(eq) == int:
         if eq == -1:
             stop = False

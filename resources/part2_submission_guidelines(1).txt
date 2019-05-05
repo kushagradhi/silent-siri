@@ -54,7 +54,7 @@ FROM 	Oscar O	INNER JOIN Person P ON person_id = P.idWHERE 	P.name LIKE "%Bige
 
 _________________________________________________
 
-What to turn in?
+What to turn in?    
 
 Put all your materials such as report and code (+readme if required) in netID_1_netID_2 folder and submit the compressed version (netID_1_netID_2.zip) in Blackboard. 
 
